@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 NFL Season Tracker</title>
+<meta name="description" content="Week by week breakdown of all 32 NFL teams: last game, positives, negatives, and what is next. Updated every week.">
+<meta name="theme-color" content="#E4E4DE">
+<meta property="og:type" content="website">
+<meta property="og:title" content="2026 NFL Season Tracker">
+<meta property="og:description" content="All 32 teams, week by week. Last game, positives, negatives, and what is next.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233D3730'/%3E%3Cpath d='M6 16h20M16 6v20' stroke='%23F4F2EC' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='5' fill='none' stroke='%232F6B4F' stroke-width='2.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nxt:#31597F; --nxt-ink:#2A4E70; --nxt-bg:#E9EFF6; --nxt-line:#C6D6E7;
+  --bg:#F4F2EC; --surface:#FFFFFF; --surface-2:#EDEAE2; --surface-3:#E4E0D6;
+  --ink:#332E29; --ink-2:#6B6459; --ink-3:#9A9287; --line:#E2DED5; --line-2:#D3CEC3;
+  --pro:#1C7F58; --pro-ink:#155E42; --pro-bg:#E6F3EC; --pro-line:#BFE1D0;
+  --con:#C4472F; --con-ink:#93341F; --con-bg:#FBEBE6; --con-line:#F0C6BB;
+  --neu-bg:#F6F4EF; --neu-line:#E6E2D9;
+  --r:16px; --r-s:10px;
+  --shadow:0 1px 2px rgba(51,46,41,.05),0 8px 24px -12px rgba(51,46,41,.16);
+  --shadow-hover:0 2px 4px rgba(51,46,41,.06),0 18px 36px -14px rgba(51,46,41,.24);
+  --maxw:1280px;
+}
+html{box-sizing:border-box;scroll-behavior:smooth;scroll-padding-top:150px}
+*,*:before,*:after{box-sizing:inherit}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+h1,h2,h3,h4,h5,.num{font-family:"Space Grotesk","Manrope",sans-serif;margin:0;letter-spacing:-.01em}
+button{font-family:inherit}
+a{color:inherit}
+
+/* ---------- app bar ---------- */
+.bar{position:sticky;top:0;z-index:50;background:rgba(244,242,236,.86);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border-bottom:1px solid var(--line)}
+.bar-in{max-width:var(--maxw);margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.brand{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em;white-space:nowrap;display:flex;align-items:center;gap:9px}
+.brand i{width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#1C7F58,#C4472F);display:inline-block}
+.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 320px;min-width:0;padding:3px;background:var(--surface-2);border-radius:999px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.wtab{flex:0 0 auto;border:0;background:transparent;color:var(--ink-2);font-weight:600;font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,box-shadow .15s}
+.wtab:hover{color:var(--ink)}
+.wtab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(51,46,41,.08),0 2px 8px -2px rgba(51,46,41,.12)}
+.wtab[disabled]{color:var(--ink-3);cursor:default;opacity:.7}
+.wtab[disabled]:hover{color:var(--ink-3)}
+.wtab.sample{font-style:italic}
+.wtab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tools-right{display:flex;gap:10px;align-items:center;flex:0 1 auto;margin-left:auto}
+.search{position:relative;flex:1 1 220px;min-width:200px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+#q{width:100%;font:inherit;font-size:14px;font-weight:500;padding:9px 34px 9px 36px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:999px;transition:box-shadow .15s,border-color .15s}
+#q::placeholder{color:var(--ink-3)}
+#q:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 4px rgba(51,46,41,.08)}
+#qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;border-radius:50%;background:var(--surface-2);color:var(--ink-2);cursor:pointer;display:none;font-size:14px;line-height:1}
+#qx.on{display:block}
+#qx:hover{background:var(--surface-3);color:var(--ink)}
+.seg{display:flex;padding:3px;background:var(--surface-2);border-radius:999px}
+.chip{border:0;background:transparent;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+.chip[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(51,46,41,.08)}
+.chip:focus-visible,#q:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ---------- results banner ---------- */
+.results{display:none;margin:22px 0 -10px;padding:12px 16px;border-radius:var(--r-s);background:var(--surface);border:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.results.on{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.results .nav{display:flex;gap:4px;align-items:center;margin-left:auto}
+.results .nav button{margin:0;width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
+.results .nav .pos{font-size:13px;color:var(--ink-3);font-weight:600;min-width:78px;text-align:center;font-variant-numeric:tabular-nums}
+.results .nav button[disabled]{opacity:.4;cursor:default}
+mark.hit{background:#F7E39C;color:var(--ink);border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px #E9CE72}
+mark.hit.cur{background:#F2B441;box-shadow:0 0 0 2px #D8952A}
+.card.hasCur{box-shadow:0 0 0 2px #E0A93C, var(--shadow-hover)}
+.results b{color:var(--ink);font-family:"Space Grotesk",sans-serif}
+.results button{margin-left:auto;border:1px solid var(--line-2);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.results button:hover{color:var(--ink);border-color:var(--ink-2)}
+body.searching .nosearch{display:none!important}
+
+/* ---------- page head ---------- */
+.pagehead{padding:40px 0 8px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--pro)}
+.eyebrow.sample i{background:var(--con)}
+.pagehead h2{font-size:clamp(30px,4.4vw,44px);font-weight:700;line-height:1.08;letter-spacing:-.02em;max-width:22ch}
+.pagehead p{max-width:74ch;color:var(--ink-2);margin:14px 0 0;font-size:15.5px}
+.sampleflag{margin-top:16px;border-radius:var(--r-s);background:var(--con-bg);border:1px solid var(--con-line);color:var(--con-ink);padding:11px 14px;font-size:14px;max-width:74ch}
+
+/* ---------- section head ---------- */
+.sec{padding-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.sec-head h3{font-size:22px;font-weight:700}
+.sec-head p{margin:0;font-size:13.5px;color:var(--ink-3)}
+
+/* ---------- slate ---------- */
+.slate{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.slot{display:block;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);padding:12px 14px;transition:transform .15s,box-shadow .15s,border-color .15s}
+.slot:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);border-color:var(--line-2)}
+.slot .when{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.slot .vs{font-family:"Space Grotesk",sans-serif;font-size:19px;font-weight:700;margin:4px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;letter-spacing:-.01em}
+.slot .vs em{font-style:normal;font-weight:500;color:var(--ink-3);font-size:14px}
+.slot .vs i{width:12px;height:12px;border-radius:4px;display:inline-block;flex:0 0 12px}
+.slot .score{margin-left:auto;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:18px}
+.slot .note{font-size:13px;color:var(--ink-2);line-height:1.45}
+
+/* ---------- game block ---------- */
+.game{margin-top:40px;scroll-margin-top:110px}
+.game-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.game-head h3{font-size:21px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.game-head h3 i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.game-head h3 em{font-style:normal;font-weight:500;color:var(--ink-3);font-size:15px}
+.game-head .meta{font-size:13px;color:var(--ink-3);margin-left:auto;font-weight:500}
+.game-note{font-size:14px;color:var(--ink-2);margin:0 0 14px}
+.pair{display:grid;gap:14px}
+@media(min-width:1040px){.pair{grid-template-columns:1fr 1fr}}
+
+/* ---------- team card ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:110px;transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card.hide{display:none}
+.card-top{padding:18px 20px 14px;position:relative}
+.card-top::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:linear-gradient(90deg,var(--tc),color-mix(in srgb,var(--tc) 55%,#fff))}
+.card-top .row{display:flex;align-items:flex-start;gap:14px}
+ .badge{width:44px;height:44px;border-radius:12px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:#fff;background:var(--tc);}
+.card-top h4{font-size:22px;font-weight:700;line-height:1.15;letter-spacing:-.015em}
+.card-top .sub{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.45}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{display:inline-flex;align-items:baseline;gap:5px;padding:4px 10px;border-radius:999px;background:var(--surface-2);font-size:12px;color:var(--ink-2);font-weight:600}
+.pill b{font-family:"Space Grotesk",sans-serif;font-size:13.5px;color:var(--ink);font-weight:700}
+.pill.win b{color:var(--pro-ink)}.pill.loss b{color:var(--con-ink)}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;padding:0 12px 12px}
+.panel{border-radius:12px;padding:14px 16px 12px;background:var(--neu-bg);border:1px solid var(--neu-line)}
+.panel.up{background:var(--pro-bg);border-color:var(--pro-line)}
+.panel.down{background:var(--con-bg);border-color:var(--con-line)}
+.panel h5{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px;display:flex;align-items:center;gap:7px}
+.panel.up h5{color:var(--pro-ink)}.panel.down h5{color:var(--con-ink)}
+.panel h5 svg{width:14px;height:14px}
+.panel ul{margin:0;padding:0;list-style:none}
+.panel li{position:relative;padding-left:14px;margin-bottom:9px;font-size:14px;line-height:1.55;color:var(--ink)}
+.panel li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--ink-3)}
+.panel.up li::before{background:var(--pro)}.panel.down li::before{background:var(--con)}
+.panel li:last-child{margin-bottom:0}
+.panel li strong{font-weight:700}
+.pending{font-size:13px;color:var(--ink-3);padding:6px 0}
+.panel.next{background:var(--nxt-bg);border-color:var(--nxt-line)}
+.panel.next h5{color:var(--nxt-ink)}
+.panel.next h5 .wk{margin-left:auto;font-weight:600;color:var(--nxt);opacity:.72;letter-spacing:0;text-transform:none}
+.gradecap{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--nxt);opacity:.7;margin-bottom:6px}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}
+.grade{background:var(--surface);border:1px solid var(--nxt-line);border-radius:10px;padding:7px 9px 6px;text-align:center}
+.grade .lab{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--nxt);opacity:.72;display:block}
+.grade .val{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:20px;line-height:1.15;letter-spacing:-.02em;display:block;margin-top:1px}
+.grade .val sup{font-size:10px;font-weight:600;color:var(--ink-3);margin-left:1px;top:-.55em}
+.delta{display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:700;line-height:1;padding:2px 6px;border-radius:999px;margin-top:3px}
+.delta.up{background:var(--pro-bg);color:var(--pro-ink)}
+.delta.down{background:var(--con-bg);color:var(--con-ink)}
+.delta.flat{background:#DDE6F0;color:var(--nxt-ink)}
+.delta.none{visibility:hidden}
+.nextrow{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.nextrow .badge{width:38px;height:38px;flex:0 0 38px;border-radius:10px;font-size:12px}
+.nextrow .who{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:17px;line-height:1.15;letter-spacing:-.01em}
+.nextrow .who em{font-style:normal;font-weight:500;color:var(--ink-3);font-size:13px;margin-right:5px}
+.nextrow .whn{font-size:12.5px;color:var(--nxt-ink);font-weight:600;margin-top:2px}
+.nextvenue{font-size:12.5px;color:var(--nxt);opacity:.66;margin:0 0 10px}
+.panel.next p{margin:0;font-size:14px;line-height:1.55;color:var(--ink)}
+.panel.next p+p{margin-top:8px}
+
+/* ---------- guide ---------- */
+.div-block{margin-top:40px}
+.div-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.div-head h3{font-size:20px;font-weight:700}
+.div-head span{font-size:13px;color:var(--ink-3)}
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:auto;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:right;padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap;background:var(--surface);position:sticky;top:0}
+th:first-child,td:first-child{text-align:left}
+th:hover,th[aria-sort]{color:var(--ink)}
+th[aria-sort="ascending"]::after{content:"\2191";margin-left:5px}
+th[aria-sort="descending"]::after{content:"\2193";margin-left:5px}
+td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap;font-family:"Space Grotesk",sans-serif;font-weight:500}
+td:first-child{font-family:"Manrope",sans-serif}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--neu-bg)}
+td a{color:var(--ink);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:10px}
+td a:hover{text-decoration:underline}
+.dot{width:10px;height:10px;border-radius:3px;flex:0 0 10px}
+.pos{color:var(--pro-ink)}.neg{color:var(--con-ink)}
+
+/* ---------- data tools ---------- */
+.tools{margin-top:48px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.tools>summary{cursor:pointer;padding:16px 20px;font-family:"Space Grotesk",sans-serif;font-size:17px;font-weight:700;list-style:none;display:flex;align-items:center;gap:10px}
+.tools>summary::-webkit-details-marker{display:none}
+.tools>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);margin-left:auto;transition:transform .15s}
+.tools[open]>summary::after{transform:rotate(-135deg)}
+.tools-body{padding:0 20px 20px;border-top:1px solid var(--line)}
+.tools-body p{font-size:14px;color:var(--ink-2);max-width:82ch;margin:14px 0}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.btn{font-size:13.5px;font-weight:700;background:var(--ink);color:#fff;border:1px solid var(--ink);padding:9px 16px;border-radius:999px;cursor:pointer;transition:opacity .15s,transform .15s}
+.btn:hover{opacity:.9}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
+.btn.ghost:hover{border-color:var(--ink-2);opacity:1}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+textarea{width:100%;min-height:150px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;padding:12px;border:1px solid var(--line-2);background:var(--neu-bg);color:var(--ink);border-radius:12px;resize:vertical}
+textarea:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 4px rgba(51,46,41,.08)}
+.status{font-size:13.5px;color:var(--pro-ink);min-height:20px;margin-top:8px;font-weight:600}
+.status.err{color:var(--con-ink)}
+.hint{font-size:13px;color:var(--ink-3);margin-top:6px}
+
+.empty{display:none;padding:56px 0;text-align:center;color:var(--ink-3)}
+.empty.on{display:block}
+footer{margin:56px 0 0;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-3);max-width:82ch}
+footer h4{font-size:15px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+footer p{margin:0 0 10px}
+main{padding-bottom:90px}
+.top{position:fixed;right:20px;bottom:20px;z-index:40;width:44px;height:44px;border-radius:50%;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);box-shadow:var(--shadow);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.top:hover{box-shadow:var(--shadow-hover)}
+@media(max-width:720px){
+  .wrap{padding:0 14px}.bar-in{padding:10px 14px}
+  .tools-right{flex:1 1 100%;margin-left:0}
+  .card-top h4{font-size:20px}.pagehead h2{max-width:none}
+  html{scroll-padding-top:190px}.card,.game{scroll-margin-top:190px}
+}
+@media print{.bar,.top,.tools{display:none}.card{break-inside:avoid;box-shadow:none}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="brand"><i></i>2026 NFL Tracker</div>
+    <div class="tabs" id="weeknav" role="tablist" aria-label="Week"></div>
+    <div class="tools-right">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search team, coach, player" aria-label="Search" autocomplete="off">
+        <button id="qx" aria-label="Clear search">&times;</button>
+      </div>
+      <div class="seg" role="group" aria-label="Conference">
+        <button class="chip" data-conf="all" aria-pressed="true">All</button>
+        <button class="chip" data-conf="AFC" aria-pressed="false">AFC</button>
+        <button class="chip" data-conf="NFC" aria-pressed="false">NFC</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="results" id="results"></div>
+  <div id="view"></div>
+</main>
+<button class="top" id="top" aria-label="Back to top">&uarr;</button>
+
+<script>
+const TEAMS = [
+/* ============================ AFC EAST ============================ */
+{
+  ab:"NE", name:"New England Patriots", conf:"AFC", div:"AFC East", color:"#002244",
+  rec:"14-3", pf:490, pa:320, pd:170, srs:5.5, wt:10.5, rank:10,
+  sub:"Mike Vrabel, year two. Lost Super Bowl LX.",
+  facts:[
+    "Went 14-3 and reached the Super Bowl in Mike Vrabel's first season, losing to Seattle. It was the joint best record in the league alongside Denver and Seattle.",
+    "That run came against one of the softest schedules in the NFL. The 2026 slate is projected sixth hardest, and the SRS of 5.5 sits well below their raw record.",
+    "Traded for <strong>A.J. Brown</strong>, giving Drake Maye a genuine outside No. 1 for the first time. Also signed <strong>Romeo Doubs</strong>.",
+    "Very active draft. Traded up to No. 28 for Utah tackle <strong>Caleb Lomu</strong>, then took edge <strong>Gabe Jacas</strong> in round two and TE Eli Raridon in round three.",
+    "Defensive additions in free agency were quieter but real. Kyle Dugger was moved on to Pittsburgh."
+  ],
+  up:[
+    "Maye now has a true target hierarchy. Brown plus Doubs plus the tight end room is a different tier of weaponry than 2025's group, and Maye is a consensus top five MVP pick.",
+    "The offensive line was addressed in the first round rather than patched, which is how contenders usually protect a young franchise passer.",
+    "Vrabel's staff has already shown it can win close games and travel well. Continuity on both coordinator staffs is an underrated edge in September.",
+    "The AFC East got worse around them. Miami is rebuilding and the Jets are still climbing out."
+  ],
+  down:[
+    "Schedule regression is the single loudest argument. A 14-win team facing a top ten schedule almost always slides, and the market has them at 10.5.",
+    "Point differential and SRS both suggest they were closer to an 11-win team than a 14-win team even last year.",
+    "Brown arrives with a history of friction when the offense stops feeding him. If the passing game stalls, that becomes a storyline fast.",
+    "Super Bowl losers historically carry a hangover, and the roster still has thin spots in the secondary."
+  ]
+},
+{
+  ab:"BUF", name:"Buffalo Bills", conf:"AFC", div:"AFC East", color:"#00338D",
+  rec:"12-5", pf:481, pa:365, pd:116, srs:4.5, wt:10.5, rank:2,
+  sub:"Joe Brady promoted to head coach. Josh Allen still the engine.",
+  facts:[
+    "Fired <strong>Sean McDermott</strong> two days after a divisional round overtime loss at Denver, then promoted offensive coordinator <strong>Joe Brady</strong> to head coach.",
+    "Lost the AFC East for the first time since 2019 and went 12-5. Fourth divisional round exit in five years.",
+    "Traded for <strong>D.J. Moore</strong> from Chicago and signed edge <strong>Bradley Chubb</strong>. James Cook led the NFL in rushing with 1,621 yards.",
+    "Traded down repeatedly out of the first round, ending with a deep haul: edge <strong>T.J. Parker</strong> at 35, CB <strong>Davison Igbinosun</strong> at 62, plus five picks in rounds four and five.",
+    "Have cleared their posted win total of 10.5 in each of the last six seasons."
+  ],
+  up:[
+    "The receiver room is finally addressed. Buffalo had not had a 900-yard pass catcher since 2023, and Moore gives Allen a real separator.",
+    "Brady already runs the offense Allen is comfortable in, so the coaching change is a front office reshuffle more than a scheme reset.",
+    "The Day 2 defensive haul plus Chubb fills the exact holes that free agency exposed. Analysts who expected a defensive drop-off have largely moved off it.",
+    "Allen remains the most common MVP pick in the league and the run game behind Cook is elite."
+  ],
+  down:[
+    "First-time head coach, first time hiring a staff, first time managing a locker room with championship-or-bust expectations. That is a lot of firsts.",
+    "The McDermott exit was public and messy. Culture questions linger until the team wins something in January.",
+    "Moore's receiving yardage has declined two years running, so this is a bet on fit rather than on production.",
+    "Safety C.J. Gardner-Johnson strained a calf in early August and is now dealing with a second injury. GM Brandon Beane has said he may not be available for Week 1. Linebacker Terrel Bernard is also uncertain with an undisclosed injury."
+  ]
+},
+{
+  ab:"NYJ", name:"New York Jets", conf:"AFC", div:"AFC East", color:"#125740",
+  rec:"3-14", pf:300, pa:503, pd:-203, srs:-12.5, wt:5.5, rank:25,
+  sub:"Aaron Glenn survives a 3-win year. Geno Smith arrives.",
+  facts:[
+    "Year one under <strong>Aaron Glenn</strong> produced three wins and the league's worst point differential outside Las Vegas. Ownership kept him anyway.",
+    "Signed <strong>Geno Smith</strong> from Las Vegas and traded for safety <strong>Minkah Fitzpatrick</strong>, then handed him a three year, $40 million extension.",
+    "Had already dealt <strong>Sauce Gardner</strong> to Indianapolis mid-2025 for two first-round picks and <strong>Quinnen Williams</strong> to Dallas, which is why they held three first-rounders in April.",
+    "Drafted edge <strong>David Bailey</strong> at No. 2, TE <strong>Kenyon Sadiq</strong> at 16, and WR <strong>Omar Cooper Jr.</strong> at 30, plus CB D'Angelo Ponds and QB Cade Klubnik on Day 3.",
+    "Also added kicker Younghoe Koo and rebuilt much of the defensive front seven through free agency."
+  ],
+  up:[
+    "This is a genuinely better football team than the one that won three games. Sharp Football moved them up two spots coming out of camp on the strength of the defensive additions.",
+    "Bailey has been the most talked about rookie pass rusher of camp, and pairing him with Fitzpatrick gives the defense two real building blocks.",
+    "Smith is a functional NFL starter with a competent floor, which is a large upgrade over what the Jets ran out last year.",
+    "Cooper and Sadiq give the offense two young pass catchers who can grow with the roster rather than rent it."
+  ],
+  down:[
+    "The roster is still short on proven depth almost everywhere, and one injury at quarterback puts them right back where they were.",
+    "Trading Gardner returned draft capital but stripped the one truly elite player on the defense.",
+    "Glenn is coaching for his job in year two, which tends to shorten the leash on developmental decisions.",
+    "Even most optimistic projections top out around seven wins. The ceiling here is respectability, not contention."
+  ]
+},
+{
+  ab:"MIA", name:"Miami Dolphins", conf:"AFC", div:"AFC East", color:"#008E97",
+  rec:"7-10", pf:347, pa:424, pd:-77, srs:-6.3, wt:4.5, rank:32,
+  sub:"Jeff Hafley inherits a teardown. Malik Willis under center.",
+  facts:[
+    "Fired <strong>Mike McDaniel</strong> and hired former Packers defensive coordinator <strong>Jeff Hafley</strong>, with new GM Jon-Eric Sullivan.",
+    "Sold aggressively. <strong>Tua Tagovailoa</strong> left for Atlanta, <strong>Jaylen Waddle</strong> was traded to Denver, <strong>Minkah Fitzpatrick</strong> went to the Jets, and <strong>Tyreek Hill</strong> and <strong>Bradley Chubb</strong> were released.",
+    "Signed <strong>Malik Willis</strong> to start. Jaelan Phillips had already been dealt to Carolina in November.",
+    "Held a league-high 13 draft picks. Took tackle <strong>Kadyn Proctor</strong> at 12, CB Chris Johnson at 27, LB Jacob Rodriguez at 43, and receivers Caleb Douglas and Chris Bell on Day 2.",
+    "Ranked last or near-last in most preseason power rankings and carry the joint lowest win total at 4.5."
+  ],
+  up:[
+    "The defensive additions are legitimately well regarded. Hafley ran a top ten unit in Green Bay twice and now gets to build one to his own spec.",
+    "Thirteen picks plus a clean cap sheet is exactly the position a rebuild wants to be in. The 2027 draft position should be excellent.",
+    "Proctor at left tackle is a decade-long fixture if he hits, and the interior line no longer looks like a liability.",
+    "Rookies Douglas and Bell could make the second half of the season more watchable than the first if either develops."
+  ],
+  down:[
+    "The receiver room is the most criticized in the league. Evaluating Willis behind it is close to impossible, which undercuts the point of the season.",
+    "Too many holes to fix in one offseason, and the schedule is projected among the two hardest in the NFL.",
+    "No clear franchise quarterback and no obvious path to one except through a bad record.",
+    "Any veteran still on the roster becomes a trade candidate by October, which usually makes the record worse before it gets better."
+  ]
+},
+/* ============================ AFC NORTH ============================ */
+{
+  ab:"BAL", name:"Baltimore Ravens", conf:"AFC", div:"AFC North", color:"#241773",
+  rec:"8-9", pf:424, pa:398, pd:26, srs:1.1, wt:11.5, rank:8,
+  sub:"John Harbaugh out after 18 years. Jesse Minter in.",
+  facts:[
+    "Went 8-9 with <strong>Lamar Jackson</strong> missing four games and playing hurt through much of the rest. Parted with <strong>John Harbaugh</strong> after 18 seasons.",
+    "Hired <strong>Jesse Minter</strong>, previously the Chargers' defensive coordinator, as head coach. Also lost OC Todd Monken to the Browns head job.",
+    "Signed <strong>Trey Hendrickson</strong> in free agency after a Maxx Crosby trade collapsed. Added CB <strong>Jaire Alexander</strong> and CB Tre'Davious White in low-cost deals.",
+    "Drafted guard <strong>Vega Ioane</strong> at 14 and edge Zion Young at 45, then loaded up on skill depth later.",
+    "Carry the joint highest posted win total in the league at 11.5 despite finishing under .500."
+  ],
+  up:[
+    "This is the classic bounce-back profile: a healthy MVP-caliber quarterback, positive point differential in a losing season, and a roster that improved on paper.",
+    "Hendrickson plus a healthy <strong>Nnamdi Madubuike</strong> gives the front the pass rush it lacked, which was the defense's clearest 2025 failure.",
+    "The AFC North turned over three of four head coaches, so Baltimore's roster continuity is a relative advantage.",
+    "Minter is well regarded and inherits a roster that many analysts still rate as the deepest in the AFC."
+  ],
+  down:[
+    "Eighteen years of institutional stability walked out the door. First-year head coaches rarely inherit an 11.5-win expectation.",
+    "Losing Monken matters. Baltimore's offensive identity was built around his marriage of the run game and Jackson's arm.",
+    "Jackson's durability is now a live question rather than a footnote, and there is no scenario where a backup keeps this win total alive.",
+    "The market has priced in the bounce-back completely. There is very little value left in the number if anything goes wrong."
+  ]
+},
+{
+  ab:"PIT", name:"Pittsburgh Steelers", conf:"AFC", div:"AFC North", color:"#FFB612",
+  rec:"10-7", pf:397, pa:387, pd:10, srs:0.1, wt:8.5, rank:20,
+  sub:"Mike Tomlin era over. McCarthy and Rodgers reunited.",
+  facts:[
+    "Won the AFC North at 10-7. <strong>Mike Tomlin</strong> is gone after 20 seasons without a losing year, replaced by <strong>Mike McCarthy</strong>.",
+    "McCarthy and <strong>Aaron Rodgers</strong> reunite from their Green Bay years. Rodgers is the Week 1 starter.",
+    "Rebuilt the receiver room around him: traded for <strong>Michael Pittman Jr.</strong> from Indianapolis and drafted <strong>Germie Bernard</strong> in round two.",
+    "Also added safety Kyle Dugger from New England and drafted tackle <strong>Max Iheanachor</strong> at 21 and QB <strong>Drew Allar</strong> at 76.",
+    "Point differential of plus 10 was the thinnest of any 2025 division winner."
+  ],
+  up:[
+    "The defense should still be good, and if <strong>T.J. Watt</strong> returns to form it has a top-five ceiling.",
+    "The front office did not stand still at receiver. Pittman is a real possession target and Bernard adds a downfield element Rodgers can use.",
+    "Two offensive linemen taken high addresses a group that has quietly been the offense's ceiling for years.",
+    "Allar in round three means the succession plan exists, which lowers the cost of a Rodgers-shaped disaster."
+  ],
+  down:[
+    "A plus 10 differential in a 10-win season is the textbook signature of a team about to regress. SRS had them at almost exactly average.",
+    "McCarthy's most recent Dallas tenure ended without a deep January run, and this is an older roster than the one he left.",
+    "Rodgers at this stage of his career carries obvious physical and locker room risk, and the offense has no proven answer behind him early.",
+    "Losing Tomlin removes the one constant that reliably kept this franchise above water in bad years."
+  ]
+},
+{
+  ab:"CIN", name:"Cincinnati Bengals", conf:"AFC", div:"AFC North", color:"#FB4F14",
+  rec:"6-11", pf:414, pa:492, pd:-78, srs:-5.1, wt:10.5, rank:11,
+  sub:"Burrow healthy, defense finally funded.",
+  facts:[
+    "Went 6-11 with <strong>Joe Burrow</strong> missing nine games and one of the worst defenses in the NFL. Zac Taylor and Duke Tobin were both retained.",
+    "Traded a first-round pick (No. 10) to the Giants for DT <strong>Dexter Lawrence II</strong> and signed edge <strong>Boye Mafe</strong> away from Seattle.",
+    "The only AFC North team that did not change head coaches this winter.",
+    "Drafted edge <strong>Cashius Howell</strong> at 41 and CB <strong>Tacario Davis</strong> at 72, doubling down on the defensive rebuild.",
+    "Face the third easiest projected schedule in the league."
+  ],
+  up:[
+    "Burrow healthy plus an easy schedule is the cleanest bounce-back setup in the AFC. The offense scored 414 points in a season it barely had its quarterback.",
+    "Lawrence and Mafe are the first genuinely expensive defensive additions this front office has made in years, and both fill premium positions.",
+    "Even a middling defense turns this into a playoff team given what the offense produced without Burrow.",
+    "The receiver duo remains among the most productive in football when the quarterback is upright."
+  ],
+  down:[
+    "The offensive line is still the unresolved question, and Burrow's availability is the entire thesis.",
+    "One offseason of spending does not undo a bottom-tier defensive roster. The back seven remains thin behind the new front.",
+    "Analysts who have been consistently low on Cincinnati remain low. Sharp Football has them 11th while the market prices them at 10.5 wins.",
+    "A minus 78 point differential is a long way to climb even with the schedule help."
+  ]
+},
+{
+  ab:"CLE", name:"Cleveland Browns", conf:"AFC", div:"AFC North", color:"#FF3C00",
+  rec:"5-12", pf:279, pa:379, pd:-100, srs:-7.4, wt:5.5, rank:31,
+  sub:"Todd Monken takes over. Myles Garrett is gone.",
+  facts:[
+    "Scored the second fewest points in the league. Fired <strong>Kevin Stefanski</strong> and hired former Ravens OC <strong>Todd Monken</strong>, who also lost DC Jim Schwartz in the process.",
+    "Traded reigning Defensive Player of the Year <strong>Myles Garrett</strong> to the Rams for edge <strong>Jared Verse</strong> and picks, a full commitment to a longer timeline.",
+    "Spent heavily on the offensive line: guard <strong>Zion Johnson</strong> for close to $50 million over three years, plus first-rounder <strong>Spencer Fano</strong> at No. 9 after trading down from 6.",
+    "Also drafted WR <strong>KC Concepcion</strong> at 24, WR Denzel Boston at 39, and QB <strong>Taylen Green</strong> in round six.",
+    "Enter the season with a four-way quarterback competition between Deshaun Watson, Shedeur Sanders, Dillon Gabriel, and Green."
+  ],
+  up:[
+    "The offensive line rebuild is the single most defensible thing any bad team did this offseason, and it directly addresses why the offense was unwatchable.",
+    "The Garrett trade returned real value for a player on the wrong side of the team's competitive window.",
+    "The 2025 rookie class was strong, headlined by Defensive Rookie of the Year <strong>Carson Schwesinger</strong>, and Judkins and Sampson give the run game two young backs.",
+    "They face the easiest projected schedule in the NFL, which should keep games competitive."
+  ],
+  down:[
+    "There is no credible starting quarterback on the roster. Analysts are near-unanimous that Watson cannot be the 2026 plan.",
+    "Losing Garrett strips the defense of the one player who could win a game alone. Schwartz's departure compounds it.",
+    "Monken has never been an NFL head coach and inherited a staff he had to build from scratch.",
+    "Even with the softest schedule in football, most projections have them fighting Miami and Arizona for the worst record."
+  ]
+},
+/* ============================ AFC SOUTH ============================ */
+{
+  ab:"JAX", name:"Jacksonville Jaguars", conf:"AFC", div:"AFC South", color:"#006778",
+  rec:"13-4", pf:474, pa:336, pd:138, srs:8.7, wt:8.5, rank:16,
+  sub:"Liam Coen's 13-win debut. Now the regression question.",
+  facts:[
+    "Went from four wins in 2024 to 13 wins and the AFC South title in <strong>Liam Coen</strong>'s first year. Lost at home in the wild card round to Buffalo.",
+    "Lost <strong>Travis Etienne Jr.</strong> (to New Orleans) and <strong>Devin Lloyd</strong> (to Carolina) in free agency, the two most notable departures on either side of the ball.",
+    "<strong>Jakobi Meyers</strong>, acquired from Las Vegas at the 2025 deadline and extended for three years and $60 million, was named a permanent captain. He joins Brian Thomas Jr., Parker Washington, and Travis Hunter in the receiver room.",
+    "Swapped corners with Cleveland, sending <strong>Greg Newsome II</strong> out and bringing <strong>Tyson Campbell</strong> back in.",
+    "Drafted TE Nate Boerkircher at 56, DT Albert Regis at 81, and guard Emmanuel Pregnon at 88 after trading their first-rounder in the 2025 Travis Hunter deal.",
+    "Their win total dropped a full four games from their 2025 result, one of the biggest gaps on the board."
+  ],
+  up:[
+    "Coen's offensive system produced immediate, dramatic improvement and the core of that unit is intact.",
+    "The roster resisted a panic overhaul. Continuity in year two of a system is usually worth something real.",
+    "SRS of 8.7 was the best in the AFC South and third best in the conference, so this was not purely a mirage.",
+    "Trevor Lawrence finally has a full offseason in a scheme that worked, and the receiver group around Hunter is settled."
+  ],
+  down:[
+    "Turnover luck is the central bear case. A large share of the 2025 jump came from a takeaway rate that rarely repeats.",
+    "Losing Etienne and Lloyd thins two positions where they had no obvious internal replacement.",
+    "Houston is coming for the division and looks like the more complete roster on paper.",
+    "Second-year coaching bumps are common, and the market moved them from 13 wins down to an 8.5 line for a reason."
+  ]
+},
+{
+  ab:"HOU", name:"Houston Texans", conf:"AFC", div:"AFC South", color:"#A71930",
+  rec:"12-5", pf:404, pa:295, pd:109, srs:8.6, wt:9.5, rank:7,
+  sub:"Started 0-3, then won 12 of 14.",
+  facts:[
+    "Started 0-3, then won 12 of their final 14 including a nine game closing streak, before losing to New England in the divisional round.",
+    "Third straight season of at least 10 wins. The defense allowed 295 points, second fewest in the AFC.",
+    "Rebuilt the interior offensive line through the draft: guard <strong>Keylan Rutledge</strong> at 26, DT Kayden McDonald at 36, TE Marlin Klein at 59, guard Febechi Nwaiwu at 106.",
+    "Traded for RB <strong>David Montgomery</strong> from Detroit and added WR John Metchie III.",
+    "<strong>Jayden Higgins</strong> tore his ACL and is out for the season. Houston traded for WR Kayshon Boutte in response. Tank Dell and tackle Braden Smith both opened on injured reserve for at least four games."
+  ],
+  up:[
+    "The defense is the most complete unit in the division and among the best in the conference. DSRS of 7.2 led the AFC comfortably.",
+    "Four of the first six picks went to the trenches, which is exactly the criticism this roster has faced for two years.",
+    "Montgomery gives them a short-yardage and closing-game back they have lacked, which matters for a team that wins low-scoring games.",
+    "They have shown they can win without their best offensive version. A 0-3 start followed by 12 of 14 is real resilience."
+  ],
+  down:[
+    "The Higgins injury is a genuine blow. Tank Dell is still working back from a 2024 knee injury and the depth behind Collins is unproven.",
+    "The offensive line is improved on paper but starts two rookies. C.J. Stroud has taken a lot of hits over three seasons.",
+    "Analysts keep circling back to the same question: is Stroud a top-tier quarterback or a good one on a great defense?",
+    "Jacksonville still owns the division and Houston has to prove it can beat them twice."
+  ]
+},
+{
+  ab:"IND", name:"Indianapolis Colts", conf:"AFC", div:"AFC South", color:"#002C5F",
+  rec:"8-9", pf:466, pa:412, pd:54, srs:5.0, wt:7.5, rank:21,
+  sub:"7-1 start, then eight losses in nine.",
+  facts:[
+    "Started 7-1 and held the AFC's No. 1 seed after Week 8, then lost eight of their last nine including a seven game closing streak.",
+    "Kept both <strong>Shane Steichen</strong> and GM <strong>Chris Ballard</strong> despite the collapse.",
+    "<strong>Daniel Jones</strong> signed a two-year, $88 million extension and is expected back as the starter after the injury that triggered the slide.",
+    "Traded <strong>Michael Pittman Jr.</strong> to Pittsburgh, meaning <strong>Alec Pierce</strong> steps into the No. 1 receiver role. They had traded two first-rounders for CB <strong>Sauce Gardner</strong> in November.",
+    "Draft leaned defense: LB CJ Allen at 53, S A.J. Haulcy at 78, LB Bryce Boettcher at 135."
+  ],
+  up:[
+    "The offense scored 466 points, fourth most in the AFC. When healthy it is a legitimately dangerous unit.",
+    "Gardner is a true No. 1 corner and the kind of piece that changes what a defense can call.",
+    "OSRS of 5.9 says the collapse was largely about who was on the field rather than how they played when whole.",
+    "The 7.5 win total gives a healthy season plenty of room to clear."
+  ],
+  down:[
+    "The entire projection rides on Jones playing like he did in the first half of 2025 while coming back from a major injury.",
+    "Trading Pittman leaves a receiver room with a significant injury question and no proven second option.",
+    "The defense still has holes despite the Gardner investment, and DSRS was negative.",
+    "Keeping the coach and GM after a seven game losing streak means nobody in the building is coaching with a clean slate."
+  ]
+},
+{
+  ab:"TEN", name:"Tennessee Titans", conf:"AFC", div:"AFC South", color:"#4B92DB",
+  rec:"3-14", pf:284, pa:478, pd:-194, srs:-8.0, wt:6.5, rank:27,
+  sub:"Robert Saleh and Brian Daboll arrive for Cam Ward's year two.",
+  facts:[
+    "Three wins in <strong>Cam Ward</strong>'s rookie year. Hired <strong>Robert Saleh</strong> as head coach and <strong>Brian Daboll</strong> as offensive coordinator.",
+    "Drafted WR <strong>Carnell Tate</strong> fourth overall, the surprise of the top five, then traded back into round one for edge <strong>Keldric Faulk</strong> at 31.",
+    "Also took LB <strong>Anthony Hill Jr.</strong> at 60 and RB Nicholas Singleton at 165 after an aggressive series of trades with Buffalo.",
+    "Signed DL <strong>John Franklin-Myers</strong> to a large deal and slot receiver <strong>Wan'Dale Robinson</strong> for four years and $78 million, reuniting him with Daboll.",
+    "Analysts were widely positive on the draft class and widely skeptical of the cornerback spending."
+  ],
+  up:[
+    "Ward finally has a downfield threat. Tate and Robinson give him a genuine No. 1 and a chain-mover, which he simply did not have.",
+    "Daboll has a track record of building an offense around a young quarterback, and Saleh has a track record of fixing defenses fast.",
+    "The draft class was one of the most praised in the league. Faulk and Hill are both projected as immediate starters.",
+    "There is nowhere to go but up from minus 194 points, and their 2025 strength of schedule was the hardest in the league."
+  ],
+  down:[
+    "This is still a bottom five roster in most evaluations. Two good hires do not close a 194-point gap in one year.",
+    "Cornerback spending is the most criticized part of the offseason. Analysts think they paid market rate for below-market play.",
+    "Ward is unproven and now has to learn a new system with a new play caller in the same building he struggled in.",
+    "The AFC South has two 12-win-plus teams at the top. Four divisional games against Houston and Jacksonville is a hard floor."
+  ]
+},
+/* ============================ AFC WEST ============================ */
+{
+  ab:"DEN", name:"Denver Broncos", conf:"AFC", div:"AFC West", color:"#FB4F14",
+  rec:"14-3", pf:401, pa:311, pd:90, srs:3.5, wt:9.5, rank:6,
+  sub:"14 wins, 11 of them by one score.",
+  facts:[
+    "Tied for the league's best record at 14-3 and reached the AFC Championship Game. Won 11 games by one possession, tying an NFL record.",
+    "Traded for <strong>Jaylen Waddle</strong>, sending first, third, and fourth round picks to Miami.",
+    "Re-signed most of their own free agents including leading rusher J.K. Dobbins, and added depth through five late picks. OLB <strong>Jonathan Cooper</strong> was placed on the commissioner exempt list before the season.",
+    "Did not hold a first-round pick. Best selections were DT Tyler Onyedim at 66 and RB Jonah Coleman at 108.",
+    "The win total sits at 9.5, a four and a half win markdown from the 2025 result and the largest drop on the board."
+  ],
+  up:[
+    "The roster has very few holes. Sean Payton's defense allowed 311 points and the offense now adds a legitimate No. 1 receiver.",
+    "Waddle is a scheme fit and gives Bo Nix a separator on the outside for the first time.",
+    "The defense's DSRS was 3.5, and it is largely intact. This is not a unit built on one contract year.",
+    "Payton has won a Super Bowl and Denver's home field remains one of the harder places to play in the AFC."
+  ],
+  down:[
+    "Eleven one-score wins is the loudest regression signal in the league. That rate does not repeat, and SRS of 3.5 tells the real story.",
+    "The lingering question at the position that decides everything: analysts are still not convinced Nix is good enough to lead a Super Bowl team.",
+    "The run game is a question mark, which matters for a team that wins close and needs to close games out.",
+    "The AFC West may be the hardest division in football. Kansas City is healthy again and the Chargers have their tackles back."
+  ]
+},
+{
+  ab:"LAC", name:"Los Angeles Chargers", conf:"AFC", div:"AFC West", color:"#0080C6",
+  rec:"11-6", pf:368, pa:340, pd:28, srs:0.8, wt:9.5, rank:5,
+  sub:"Both All-Pro tackles back. Mike McDaniel calling plays.",
+  facts:[
+    "Won 11 games despite losing All-Pro tackles <strong>Joe Alt</strong> and <strong>Rashawn Slater</strong> for most of the year. Both are expected back.",
+    "Hired <strong>Mike McDaniel</strong> as offensive coordinator after he withdrew from the Browns head coaching search.",
+    "Lost DC Jesse Minter to the Ravens head job. Traded for edge <strong>Odafe Oweh</strong> and drafted OLB <strong>Akheem Mesidor</strong> at 22 and center <strong>Jake Slaughter</strong> at 63.",
+    "Traded down twice on Day 2 and came away with eight picks in rounds four through six.",
+    "Their win total went down despite the tackle returns and the McDaniel hire, which several analysts flagged as odd."
+  ],
+  up:[
+    "Getting two All-Pro tackles back is functionally a major free agency haul that cost nothing.",
+    "McDaniel is one of the most inventive play designers in the league and now works with Justin Herbert, who is a common top-three MVP pick.",
+    "The defense is talented and Jim Harbaugh's teams have consistently outperformed their roster ranking.",
+    "Sharp Football has them fifth, well above their posted number, calling the win total soft."
+  ],
+  down:[
+    "Health is the whole thesis. Center <strong>Tyler Biadasz</strong> is expected out for an extended stretch, so rookie Jake Slaughter starts, and Slater had a knee flare-up in August before being cleared.",
+    "Losing Minter as coordinator is a real change even with Chris O'Leary keeping the scheme, and center Tyler Biadasz is expected out for a long stretch.",
+    "A plus 28 differential in an 11-win season is a warning that they were closer to average than the record suggested.",
+    "There is a long institutional history of this franchise finding a way to disappoint expectations that look exactly like these."
+  ]
+},
+{
+  ab:"KC", name:"Kansas City Chiefs", conf:"AFC", div:"AFC West", color:"#E31837",
+  rec:"6-11", pf:362, pa:328, pd:34, srs:1.9, wt:10.5, rank:14,
+  sub:"Six wins, 1-9 in one-score games, Mahomes back from an ACL.",
+  facts:[
+    "Six wins, their fewest since 2012, driven by a 1-9 record in one-score games. Missed the playoffs for the first time since 2014.",
+    "<strong>Patrick Mahomes</strong> tore his ACL and missed the final three games. He is expected to start Week 1.",
+    "Signed Super Bowl MVP <strong>Kenneth Walker III</strong> from Seattle to fix the run game.",
+    "Traded up to No. 6 for CB <strong>Mansoor Delane</strong>, then took DT <strong>Peter Woods</strong> at 29 and edge R Mason Thomas at 40. Also drafted QB Garrett Nussmeier at 249.",
+    "Traded CB <strong>Trent McDuffie</strong> to the Rams and guard <strong>Joe Thuney</strong> to Chicago, reshaping both lines."
+  ],
+  up:[
+    "A 1-9 record in one-score games is close to pure variance. Positive point differential in a six-win season screams bounce-back.",
+    "Mahomes healthy plus Walker in the backfield gives the offense a dimension it has been missing for several seasons.",
+    "Delane and Woods are premium-position first-rounders on a defense that already had a strong DSRS of 3.8.",
+    "The market has them at 10.5 wins, which reflects near-total confidence that 2025 was an aberration."
+  ],
+  down:[
+    "The most pointed analyst critique this year is that the roster simply is not elite anymore, and that Mahomes has been carrying it.",
+    "Trading McDuffie and Thuney removed two of the best players at their positions. The rookies replacing them are rookies.",
+    "A quarterback returning from a torn ACL at 31 is not a guaranteed return to form, particularly for a player whose game increasingly depends on escapability.",
+    "They now play in the toughest division in football and no longer have the benefit of the doubt in it."
+  ]
+},
+{
+  ab:"LV", name:"Las Vegas Raiders", conf:"AFC", div:"AFC West", color:"#6E7679",
+  rec:"3-14", pf:241, pa:432, pd:-191, srs:-10.5, wt:5.5, rank:29,
+  sub:"Pete Carroll one-and-done. Fernando Mendoza is the future.",
+  facts:[
+    "Worst record in football at 3-14 and the fewest points scored in the league. Fired <strong>Pete Carroll</strong> after one season.",
+    "Hired <strong>Klint Kubiak</strong>, Seattle's Super Bowl-winning offensive coordinator, as head coach, with Rob Leonard as defensive coordinator.",
+    "Used the No. 1 overall pick on Heisman winner <strong>Fernando Mendoza</strong>. <strong>Kirk Cousins</strong> starts Week 1 as the bridge.",
+    "Spent $281.5 million on the first day of free agency alone, headlined by center <strong>Tyler Linderbaum</strong>. Traded away <strong>Geno Smith</strong> to the Jets.",
+    "Their win total was the only line on the board to move in the final three weeks of preseason, dropping a full win to 5.5."
+  ],
+  up:[
+    "Mendoza is the most highly regarded quarterback prospect in several drafts, and having Cousins bridge means he does not have to be rushed.",
+    "The offensive line rebuild around Linderbaum was aggressive and directly addresses why the offense scored 241 points.",
+    "Kubiak just called plays for a Super Bowl winner and brings a system with a proven track record of elevating average personnel.",
+    "Ashton Jeanty and Maxx Crosby are both legitimate building blocks who were wasted on a three-win roster."
+  ],
+  down:[
+    "They play in the strongest division in football. Even a much better team could still finish 5-11 on strength of schedule alone.",
+    "First-time head coach, rookie quarterback in waiting, and a locker room that was openly frustrated by how last season ended.",
+    "The free agency spending was broad rather than targeted, and analysts questioned whether it bought enough real talent.",
+    "The line moving down a full win during preseason suggests the market saw something it did not like."
+  ]
+},
+/* ============================ NFC EAST ============================ */
+{
+  ab:"PHI", name:"Philadelphia Eagles", conf:"NFC", div:"NFC East", color:"#004C54",
+  rec:"11-6", pf:379, pa:325, pd:54, srs:2.8, wt:10.5, rank:9,
+  sub:"8-2 start, then five losses in eight. A.J. Brown is gone.",
+  facts:[
+    "Won the NFC East at 11-6 but started 8-2 and lost five of their last eight, then fell to San Francisco in the wild card round.",
+    "Traded <strong>A.J. Brown</strong> to New England. <strong>DeVonta Smith</strong> is now the No. 1, with <strong>Makai Lemon</strong> (20th), TE <strong>Eli Stowers</strong> (54th), <strong>Dontayvion Wicks</strong> by trade, and free agent Hollywood Brown behind him.",
+    "Big defensive additions: signed CB <strong>Riq Woolen</strong> away from Seattle and traded for edge <strong>Jonathan Greenard</strong> from Minnesota.",
+    "New offensive coordinator <strong>Sean Mannion</strong> takes over the play calling.",
+    "Have cleared this 10.5 win total in each of the last four seasons."
+  ],
+  up:[
+    "The defense may be the best in the NFC after adding Greenard and Woolen to a unit that already had the conference's third best DSRS.",
+    "The bar for the offense is low. It scored only 379 points last year, so replacing Brown by committee does not require much.",
+    "Lemon was the Biletnikoff winner and Stowers the Mackey winner. That is not a bad pair of consolation prizes.",
+    "Roster continuity in the front seven and the offensive line remains among the best in football."
+  ],
+  down:[
+    "Losing your alpha receiver rarely improves an offense, however expected the split was. Hurts loses his most reliable contested-catch target.",
+    "A new play caller in Mannion is an unknown, and the second-half collapse happened with a more talented skill group than this one.",
+    "The late-season fade is now a pattern rather than an event, and it has ended two consecutive seasons.",
+    "Dallas has rebuilt its defense and the division is no longer a walk."
+  ]
+},
+{
+  ab:"DAL", name:"Dallas Cowboys", conf:"NFC", div:"NFC East", color:"#003594",
+  rec:"7-9-1", pf:471, pa:511, pd:-40, srs:-4.1, wt:9.5, rank:12,
+  sub:"Elite offense, historically bad defense, now rebuilt.",
+  facts:[
+    "Went 7-9-1 with the fifth highest scoring offense in football at 27.7 points per game and one of its worst defenses. DSRS was minus 8.7.",
+    "Rebuilt the defense aggressively: traded for edge <strong>Rashan Gary</strong>, drafted safety <strong>Caleb Downs</strong> at 11 after trading up, and added edge <strong>Malachi Lawrence</strong> at 23.",
+    "Had already traded for DT <strong>Quinnen Williams</strong> in November, sending a 2027 first-rounder to the Jets.",
+    "Moved on from DTs <strong>Osa Odighizuwa</strong> (49ers) and <strong>Solomon Thomas</strong> (Titans), plus LB Logan Wilson.",
+    "Face an easier schedule than in 2025 and their win total climbed two games above last year's result."
+  ],
+  up:[
+    "The single biggest talent injection on defense of any team this offseason. Downs was the Thorpe winner and Gary is a proven double-digit sack player.",
+    "The Lamb and Pickens receiver pairing is one of the best duos in the league, and the offense never needed fixing.",
+    "Sharp Football moved them up four spots out of camp and describes them as underrated. Their 12th-place analyst rank sits well ahead of public perception.",
+    "A minus 40 differential with 471 points scored means the offense only needed a competent defense to swing several games."
+  ],
+  down:[
+    "Rebuilding a defense that bad in one offseason is a lot to ask, and two of the key pieces are rookies.",
+    "Brian Schottenheimer is still unproven as a head coach and the tie plus nine losses came against a soft schedule.",
+    "The interior defensive line got worse in raw terms even as the edges and secondary improved.",
+    "Philadelphia is still the class of the division and Dallas has to prove it can win a game where it does not score 30."
+  ]
+},
+{
+  ab:"WAS", name:"Washington Commanders", conf:"NFC", div:"NFC East", color:"#5A1414",
+  rec:"5-12", pf:356, pa:451, pd:-95, srs:-5.7, wt:7.5, rank:23,
+  sub:"From NFC title game to five wins in one year.",
+  facts:[
+    "Fell from 12 wins and an NFC Championship Game appearance in 2024 to 5-12. <strong>Jayden Daniels</strong> missed seven games and the team went 2-5 without him.",
+    "Drafted LB <strong>Sonny Styles</strong> seventh overall on a fully guaranteed four year, $37.2 million deal, plus WR Antonio Williams at 71.",
+    "Signed WR <strong>Stefon Diggs</strong> to give Daniels a veteran target.",
+    "New defensive coordinator <strong>Daronte Jones</strong> takes over the unit.",
+    "<strong>Laremy Tunsil</strong>, acquired for a package of picks in 2025, is expected to miss most of the season."
+  ],
+  up:[
+    "Daniels healthy is the whole difference. The 2024 version of this team went to a conference championship with much the same core.",
+    "Diggs plus Terry McLaurin gives the offense a real two-receiver structure, and reporting on the planned offensive scheme has been positive.",
+    "Styles was one of four Ohio State defenders taken in the top eleven and projects as an immediate three-down linebacker.",
+    "The 7.5 win total is only two and a half above a season in which their quarterback missed 40 percent of the games."
+  ],
+  down:[
+    "The offensive line is the problem nobody has solved. Losing Tunsil for most of the year undercuts everything else the offense wants to do.",
+    "Daniels' injury history is now two seasons long, and his running style is central to how the offense functions.",
+    "A minus 95 point differential is a lot of ground, and the defense finished with a negative DSRS even before the coordinator change.",
+    "Both Philadelphia and Dallas look stronger, which makes the division path narrow."
+  ]
+},
+{
+  ab:"NYG", name:"New York Giants", conf:"NFC", div:"NFC East", color:"#0B2265",
+  rec:"4-13", pf:381, pa:439, pd:-58, srs:-3.6, wt:7.5, rank:24,
+  sub:"John Harbaugh takes over a young core.",
+  facts:[
+    "Went 4-13. <strong>Brian Daboll</strong> was fired in November at 2-8 with Mike Kafka finishing 2-5 as interim.",
+    "Hired <strong>John Harbaugh</strong> as head coach, with <strong>Matt Nagy</strong> as offensive coordinator and <strong>Dennard Wilson</strong> as defensive coordinator.",
+    "Traded <strong>Dexter Lawrence</strong> to Cincinnati for the No. 10 pick, then used two first-rounders on LB <strong>Arvell Reese</strong> at 5 and guard <strong>Francis Mauigoa</strong> at 10.",
+    "Also added CB Colton Hood at 37 and WR Malachi Fields at 74. Added DL Jordan Phillips.",
+    "Young core is set: <strong>Jaxson Dart</strong> at quarterback, <strong>Cam Skattebo</strong> at running back, <strong>Malik Nabers</strong> at receiver."
+  ],
+  up:[
+    "Harbaugh is the most accomplished head coaching hire of the cycle by a wide margin, and he inherits a genuinely young roster rather than an old one.",
+    "The draft class was widely praised. Reese and Mauigoa both project as immediate starters at premium positions.",
+    "Thirteen wins over three seasons means the bar for visible improvement is very low, and the arrow points up.",
+    "Dart, Skattebo, and Nabers give the offense three cost-controlled pieces to build around."
+  ],
+  down:[
+    "Nabers is coming off a torn ACL and was non-committal about Week 1. The receiver depth behind him is thin.",
+    "Trading Lawrence left a real hole. The defensive line was rebuilt but analysts still flag it as the roster's weak spot.",
+    "Dart has 2025 starts under his belt but is unproven, and Nagy's play calling record as a coordinator is mixed.",
+    "This is still a bottom-ten roster in a division with two playoff-caliber teams."
+  ]
+},
+/* ============================ NFC NORTH ============================ */
+{
+  ab:"CHI", name:"Chicago Bears", conf:"NFC", div:"NFC North", color:"#C83803",
+  rec:"11-6", pf:441, pa:415, pd:26, srs:0.5, wt:9.5, rank:17,
+  sub:"Ben Johnson wins the North. Now the hardest schedule in football.",
+  facts:[
+    "Won 11 games and the NFC North in <strong>Ben Johnson</strong>'s first season, then beat Green Bay in the wild card round after trailing 21-3 at half.",
+    "Face the NFL's toughest projected schedule in 2026.",
+    "Center <strong>Drew Dalman</strong> retired unexpectedly. They drafted Rimington winner <strong>Logan Jones</strong> at 57 as the replacement and had traded for <strong>Joe Thuney</strong> the year before.",
+    "Traded <strong>D.J. Moore</strong> to Buffalo. Drafted safety <strong>Dillon Thieneman</strong> at 25, TE Sam Roush at 69, WR Zavion Thomas at 89, CB Malik Muhammad at 124.",
+    "Safety <strong>Coby Bryant</strong>, signed away from Seattle for three years and $40 million, had knee surgery on August 7 and is out four to six months. CB Kyler Gordon (calf) is also on injured reserve. The team signed veteran Xavier Woods to fill in."
+  ],
+  up:[
+    "Johnson's offense produced 441 points in year one and Caleb Williams improved visibly across the season. Year two in a system usually helps most.",
+    "The defensive additions in free agency were sound and the front seven is deeper than it was.",
+    "They have already beaten Green Bay in January, which removes a psychological barrier this franchise carried for years.",
+    "The skill group is young and Johnson has a track record of scheming production out of committee receiver rooms."
+  ],
+  down:[
+    "The hardest schedule in the league is the main reason their number sits below their 2025 win total.",
+    "Several key defensive departures plus the Bryant injury leaves the secondary thinner than it looks on paper.",
+    "Dalman's retirement means a rookie center is snapping to a quarterback still working on his internal clock.",
+    "A plus 26 differential in an 11-win season and an SRS of 0.5 both say this was closer to a nine-win team."
+  ]
+},
+{
+  ab:"GB", name:"Green Bay Packers", conf:"NFC", div:"NFC North", color:"#203731",
+  rec:"9-7-1", pf:391, pa:360, pd:31, srs:1.0, wt:9.5, rank:4,
+  sub:"Micah Parsons on the roster, Josh Jacobs on the exempt list.",
+  facts:[
+    "Went 9-7-1 and lost their final five, then blew a 21-3 halftime lead in the wild card round at Chicago. Second straight one-and-done.",
+    "Have <strong>Micah Parsons</strong>, acquired from Dallas in August 2025 for Kenny Clark and two first-round picks. He is unavailable for the opening four games.",
+    "<strong>Josh Jacobs</strong> is on the commissioner exempt list with no timeline. MarShawn Lloyd is the lead back in the interim.",
+    "Lost WR <strong>Dontayvion Wicks</strong> by trade to Philadelphia and DC Jeff Hafley to the Miami head job.",
+    "Draft was defense-heavy: CB <strong>Brandon Cisse</strong> at 52, DT Chris McClellan at 77, edge Dani Dennis-Sutton at 120, CB Domani Jackson at 201."
+  ],
+  up:[
+    "Love has been the sixth most efficient quarterback in EPA per dropback over the last three seasons. Sharp Football's case for ranking them fourth is that this is a top-tier passer on an otherwise complete roster.",
+    "Parsons is a first-team All-Pro and a defense-altering player whenever he is back on the field.",
+    "The 2025 team was a positive point differential team that lost close games late. That profile usually improves.",
+    "The defensive draft class addresses the secondary, which was the unit that broke down in the playoff loss."
+  ],
+  down:[
+    "Missing Parsons for four games and Jacobs entirely is a serious start-of-season handicap, and the schedule is projected third hardest.",
+    "They have cleared 9.5 wins only twice in the last five seasons despite consistently being ranked highly in August.",
+    "An NFLPA report card showed the largest single-season ratings decline on record, dropping from 7th to 21st. Internal culture is a live question.",
+    "Two straight wild card exits, one of them a historic collapse, is a pattern this staff has not answered."
+  ]
+},
+{
+  ab:"MIN", name:"Minnesota Vikings", conf:"NFC", div:"NFC North", color:"#4F2683",
+  rec:"9-8", pf:344, pa:333, pd:11, srs:0.7, wt:8.5, rank:19,
+  sub:"Kyler Murray arrives to compete with J.J. McCarthy.",
+  facts:[
+    "Went 9-8 after letting Sam Darnold walk, and finished by winning their final five games.",
+    "Signed <strong>Kyler Murray</strong> to a veteran minimum contract to compete with <strong>J.J. McCarthy</strong> for the starting job. Murray was released by Arizona.",
+    "Traded edge <strong>Jonathan Greenard</strong> to Philadelphia and DT Harrison Phillips to the Jets, significantly reshaping the front.",
+    "<strong>Brian Flores</strong> signed an extension as defensive coordinator in January.",
+    "Drafted DE <strong>Caleb Banks</strong> at 18, LB Jake Golday at 51, DT Domonique Orange at 82, plus two extra third-rounders."
+  ],
+  up:[
+    "Flores' defense allowed just 333 points and his DSRS of 4.2 was among the best in the conference. That system has survived personnel turnover before.",
+    "Murray at the minimum is one of the best value signings of the offseason. Sharp Football is explicitly higher on Minnesota with him starting.",
+    "Winning the last five games of 2025 suggests the roster figured something out late, and much of it returns.",
+    "Justin Jefferson remains the best receiver in football, which raises the floor of any quarterback situation."
+  ],
+  down:[
+    "The defense will look very different. Losing Greenard and Phillips takes two starters out of the front and the draft picks replacing them are rookies.",
+    "A quarterback competition this close to Week 1 is rarely a sign of confidence in either option.",
+    "The offense scored only 344 points, third fewest among winning teams, and OSRS was minus 3.4.",
+    "Both Murray and McCarthy have significant durability histories, and the backup situation is unsettled."
+  ]
+},
+{
+  ab:"DET", name:"Detroit Lions", conf:"NFC", div:"NFC North", color:"#0076B6",
+  rec:"9-8", pf:481, pa:413, pd:68, srs:3.9, wt:10.5, rank:15,
+  sub:"15 wins to 9-8, and now the secondary is a problem.",
+  facts:[
+    "Fell from 15 wins in 2024 to 9-8 and missed the playoffs, finishing last in the NFC North.",
+    "That last-place finish earns them the sixth easiest projected schedule in 2026, which is the main reason their win total sits at 10.5.",
+    "Still scored 481 points, second most in the NFC. <strong>Jahmyr Gibbs</strong> put up 1,223 rushing yards, 77 catches, and 18 total touchdowns.",
+    "Traded RB <strong>David Montgomery</strong> to Houston and signed <strong>Isiah Pacheco</strong>, who then opened the season on injured reserve with a back issue. Drafted tackle <strong>Blake Miller</strong> at 17 and edge Derrick Moore at 44.",
+    "<strong>Terrion Arnold</strong> was traded to Seattle and both starting safeties, <strong>Brian Branch</strong> and <strong>Kerby Joseph</strong>, opened the year on the PUP list."
+  ],
+  up:[
+    "The offense remains one of the two or three most productive in the NFC, and Gibbs is a genuine offensive player of the year candidate.",
+    "The easiest realistic path back to the division: the schedule is soft and Chicago and Green Bay both have their own problems.",
+    "A plus 68 point differential in a 9-8 season means the underlying team was better than the record.",
+    "Miller at 17 addresses the offensive line, which was the unit most affected by 2025's injuries."
+  ],
+  down:[
+    "The secondary is the biggest camp story in the league right now. Losing Arnold and having both safeties on PUP is why Sharp Football dropped them four spots.",
+    "DSRS was already negative at minus 1.3 before any of that happened.",
+    "The 2024 to 2025 fall was not just injuries. Coordinator turnover has cost them on both sides of the ball.",
+    "A 10.5 win total on a team with a broken secondary is the kind of number analysts point at as too high."
+  ]
+},
+/* ============================ NFC SOUTH ============================ */
+{
+  ab:"TB", name:"Tampa Bay Buccaneers", conf:"NFC", div:"NFC South", color:"#D50A0A",
+  rec:"8-9", pf:380, pa:411, pd:-31, srs:-1.1, wt:8.5, rank:18,
+  sub:"6-2 start, then seven losses in nine.",
+  facts:[
+    "Started 6-2, then lost seven of their last nine and missed the playoffs at 8-9.",
+    "<strong>Baker Mayfield</strong> played through injury for much of the collapse and is expected back healthy.",
+    "Lost <strong>Mike Evans</strong> to San Francisco in free agency, ending a franchise era.",
+    "Drafted Ted Hendricks winner <strong>Rueben Bain Jr.</strong> at 15 and LB <strong>Josiah Trotter</strong> at 46, then added WRs Ted Hurst and Bauer Sharp later.",
+    "Vegas has them projected for essentially the same season, with a win total of 8.5."
+  ],
+  up:[
+    "A healthy Mayfield is a meaningfully better quarterback than the one who finished 2025, and the offensive core largely returns.",
+    "Bain was the most productive edge rusher in the draft class and fills the defense's clearest need immediately.",
+    "Most analysts have them as the best team in the NFC South, which is a division that has been won with eight wins two years running.",
+    "The negative differential was concentrated in the losing streak. The first half of the season showed a functional playoff team."
+  ],
+  down:[
+    "Replacing Evans is not a solved problem. The receiver room is now young and unproven behind Godwin.",
+    "Second-half collapses have now happened in consecutive seasons under this staff.",
+    "The defense's DSRS was negative and the secondary is the thinnest part of the roster.",
+    "Being the best team in the NFC South still probably means a wild card exit. The ceiling question is the one nobody can answer."
+  ]
+},
+{
+  ab:"CAR", name:"Carolina Panthers", conf:"NFC", div:"NFC South", color:"#0085CA",
+  rec:"8-9", pf:311, pa:380, pd:-69, srs:-3.6, wt:7.5, rank:22,
+  sub:"Won the division at 8-9. Both tackles start on the shelf.",
+  facts:[
+    "Won the NFC South at 8-9, their first playoff appearance since 2017, then lost a wild card shootout to the Rams.",
+    "Upgraded the defense significantly: traded for edge <strong>Jaelan Phillips</strong> from Miami and signed LB <strong>Devin Lloyd</strong> away from Jacksonville.",
+    "Drafted tackle <strong>Monroe Freeling</strong> at 19 and traded up for DT <strong>Lee Hunter</strong> at 49, then added WR Chris Brazzell II at 83. Signed tackle Rasheed Walker in free agency and TE <strong>Darren Waller</strong> to a one-year deal in August.",
+    "<strong>Tetairoa McMillan</strong> won Offensive Rookie of the Year in 2025.",
+    "Both starting tackles are unavailable for at least the first four games. <strong>Ikem Ekwonu</strong> is on reserve PUP with a knee and <strong>Taylor Moton</strong> on reserve NFI."
+  ],
+  up:[
+    "Phillips and Lloyd are two genuine difference-makers on a defense that already had a positive DSRS of 1.4.",
+    "Sharp Football's read is that the roster deserves to be treated separately from the doubts about Bryce Young, and that it is solidly mid-pack.",
+    "McMillan is a legitimate No. 1 receiver on a rookie contract, and Brazzell adds depth behind him.",
+    "They have already won this division once with a modest roster, and the NFC South remains the weakest in football."
+  ],
+  down:[
+    "Losing both starting tackles for a month is a severe pass protection problem for a quarterback who struggles under pressure.",
+    "The offense scored only 311 points, fewest of any 2025 playoff team by a wide margin.",
+    "Bryce Young remains the central unresolved question, and nothing this offseason changed the evaluation.",
+    "One outlet has them ranked 32nd, which shows how wide the disagreement is on this roster."
+  ]
+},
+{
+  ab:"ATL", name:"Atlanta Falcons", conf:"NFC", div:"NFC South", color:"#A71930",
+  rec:"8-9", pf:353, pa:401, pd:-48, srs:-2.8, wt:6.5, rank:28,
+  sub:"Kevin Stefanski arrives. The quarterback picture is a mess.",
+  facts:[
+    "Went 8-9 and closed the season on a four game winning streak. Fired <strong>Raheem Morris</strong> and hired <strong>Kevin Stefanski</strong>, with Tommy Rees as offensive coordinator.",
+    "Signed <strong>Tua Tagovailoa</strong> in free agency. <strong>Michael Penix Jr.</strong> is recovering from a knee injury and the starter for Week 1 has not been named.",
+    "Drafted CB <strong>Avieon Terrell</strong> at 48, whose brother A.J. is already on the roster, and WR <strong>Zachariah Branch</strong> at 79.",
+    "Have no first-round pick as a result of the 2025 trade up with the Rams for James Pearce Jr.",
+    "Playmakers are in place: <strong>Bijan Robinson</strong>, <strong>Drake London</strong>, and <strong>Kyle Pitts</strong>, who made second-team All-Pro."
+  ],
+  up:[
+    "Stefanski is a two-time Coach of the Year and one of the more respected hires of the cycle. He inherits far more offensive talent than he had in Cleveland.",
+    "Bijan Robinson, London, and Pitts is a genuinely good skill trio. The offense underperformed its personnel under the previous staff.",
+    "The division has been winnable with eight wins in each of the last two seasons, so a modest step forward is enough.",
+    "Closing 2025 on a four-game winning streak suggests the roster is not as bad as the record."
+  ],
+  down:[
+    "The quarterback situation is the worst kind: two options, neither clearly better, and no resolution days before kickoff.",
+    "Sharp Football's assessment is blunt, noting Tua apparently lost a competition to a player who could not practice.",
+    "No first-round pick means no immediate reinforcement, and the defense finished with a negative DSRS.",
+    "Their win total dropped despite the strong finish, which reflects how little the market trusts the quarterback room."
+  ]
+},
+{
+  ab:"NO", name:"New Orleans Saints", conf:"NFC", div:"NFC South", color:"#B8A06A",
+  rec:"6-11", pf:306, pa:383, pd:-77, srs:-4.9, wt:7.5, rank:26,
+  sub:"Tyler Shough gets the job and the second easiest schedule.",
+  facts:[
+    "Won six games, but went 5-4 in games <strong>Tyler Shough</strong> started and 1-7 in every other game.",
+    "Shough enters 2026 as the unquestioned starter under second-year head coach <strong>Kellen Moore</strong>.",
+    "Face the second easiest projected schedule in the NFL.",
+    "Drafted WR <strong>Jordyn Tyson</strong> eighth overall and DT <strong>Christen Miller</strong> at 42, plus TE Oscar Delp at 73 and WR Barion Brown at 190. Signed RB <strong>Travis Etienne Jr.</strong> away from Jacksonville.",
+    "Tyson is on injured reserve with a hamstring to start the year and will miss at least four games."
+  ],
+  up:[
+    "The Shough splits are striking. A full season of the quarterback who went 5-4 is a very different team from the one that went 6-11.",
+    "The second easiest schedule in football is a real structural advantage in a weak division.",
+    "The offseason was clearly built around supporting Shough, and analysts generally liked the approach.",
+    "Moore is in year two of a deliberate youth movement, so the arrow points up even in a mediocre season."
+  ],
+  down:[
+    "The defense has significant question marks and the front office largely did not address them.",
+    "Losing Tyson for the first month removes the rookie who was supposed to open up the passing game.",
+    "Only 306 points scored, third fewest in the NFC, and OSRS of minus 5.5 was among the worst in football.",
+    "The nine-start sample on Shough is small enough that the split could be noise rather than signal."
+  ]
+},
+/* ============================ NFC WEST ============================ */
+{
+  ab:"LAR", name:"Los Angeles Rams", conf:"NFC", div:"NFC West", color:"#E5A100",
+  rec:"12-5", pf:518, pa:346, pd:172, srs:12.5, wt:11.5, rank:1,
+  sub:"Added Myles Garrett to a roster that had no holes.",
+  facts:[
+    "Won 12 games and lost the NFC Championship Game. Scored a league-high 518 points. <strong>Matthew Stafford</strong> won AP MVP with 4,707 passing yards.",
+    "Traded for reigning Defensive Player of the Year <strong>Myles Garrett</strong> and for CB <strong>Trent McDuffie</strong>, addressing the secondary that was their only real weakness.",
+    "Also added CB Tre'Davious White and LB Ernest Jones-adjacent depth. Hired Bubba Ventrone as special teams coordinator.",
+    "Held the fewest draft picks in the league at five. Took QB <strong>Ty Simpson</strong> at 13 and TE Max Klare at 61. Simpson has been named QB3.",
+    "Entered the season as Super Bowl favorites at +550 and carry the joint highest win total at 11.5."
+  ],
+  up:[
+    "This is the most complete roster in football on paper. An MVP quarterback, the league's best receiver production in Puka Nacua, and now the best defensive player alive.",
+    "SRS of 12.5 was second in the league and their losses to Seattle came down to a handful of plays.",
+    "The Garrett and McDuffie trades turned the one weak unit into a strength. Their defensive line is widely rated the best position group in the NFL.",
+    "Sean McVay's staff has continuity and Stafford is coming off the best statistical season of his career."
+  ],
+  down:[
+    "Garrett missed most of camp with knee swelling and did not practice Tuesday, though McVay says he will be ready for Week 1. <strong>Aaron Donald</strong> came out of retirement to rejoin the team but will not play or travel for the opener.",
+    "<strong>Puka Nacua</strong> remains under league review for an offseason civil suit, but he was not placed on the exempt list and the latest reporting says he may avoid discipline this season entirely.",
+    "Five draft picks means almost no cheap depth. An injury run would be difficult to absorb.",
+    "Stafford is 38 and the roster is built to win now. There is no version of this season where a slow start is acceptable."
+  ]
+},
+{
+  ab:"SEA", name:"Seattle Seahawks", conf:"NFC", div:"NFC West", color:"#69BE28",
+  rec:"14-3", pf:483, pa:292, pd:191, srs:12.8, wt:10.5, rank:3,
+  sub:"Defending champions, minus several contributors.",
+  facts:[
+    "Won Super Bowl LX over New England for the franchise's second title, after a 14-3 season with the league's best SRS at 12.8 and its fewest points allowed at 292.",
+    "<strong>Jaxon Smith-Njigba</strong> won Offensive Player of the Year with a franchise-record 119 catches and a league-leading 1,793 receiving yards.",
+    "Lost offensive coordinator <strong>Klint Kubiak</strong> to the Raiders head coaching job, which analysts rate as the most damaging departure.",
+    "Player losses include Super Bowl MVP <strong>Kenneth Walker III</strong> to Kansas City, edge <strong>Boye Mafe</strong> to Cincinnati, and DBs <strong>Coby Bryant</strong> and <strong>Riq Woolen</strong>. Acquired CB <strong>Terrion Arnold</strong> from Detroit, who is now on the commissioner exempt list.",
+    "Drafted RB <strong>Jadarian Price</strong> at 32 and S Bud Clark at 64, and traded for WR Rashid Shaheed. <strong>Zach Charbonnet</strong> is unavailable for the first four games."
+  ],
+  up:[
+    "<strong>Mike Macdonald</strong> is regarded as one of the best coaches in football and the defense was historically good, allowing the fewest points in the league.",
+    "Smith-Njigba is the reigning Offensive Player of the Year and the passing game returns essentially intact.",
+    "Roster attrition is normal for champions, and the top of the depth chart is still elite on both sides.",
+    "They have already beaten the Rams twice in one season, which is the specific test the NFC West will come down to."
+  ],
+  down:[
+    "The roster is objectively less talented than the one that won the title. Analysts are near-unanimous on that point.",
+    "Losing Kubiak removes the architect of the offense that just won a Super Bowl, and the replacement is unproven.",
+    "The backfield is a genuine unknown. Walker is gone, Charbonnet is out for a month, and a rookie is the lead back.",
+    "Champions face the hardest version of everyone's schedule. Their win total dropped three and a half games from last year's result."
+  ]
+},
+{
+  ab:"SF", name:"San Francisco 49ers", conf:"NFC", div:"NFC West", color:"#AA0000",
+  rec:"12-5", pf:437, pa:371, pd:66, srs:6.0, wt:9.5, rank:13,
+  sub:"12 wins through an injury crisis. Now an aging skill group.",
+  facts:[
+    "Won 12 games despite <strong>Brock Purdy</strong> missing eight, and season-ending injuries to <strong>Fred Warner</strong> and <strong>Nick Bosa</strong>. George Kittle and Talanoa Hufanga also missed significant time.",
+    "Beat Philadelphia in the wild card round on a late touchdown.",
+    "Signed <strong>Mike Evans</strong> in free agency and traded for DT <strong>Osa Odighizuwa</strong> from Dallas.",
+    "Traded down repeatedly in the draft. Took WR <strong>De'Zhaun Stribling</strong> at 33, edge Romello Height at 70, RB Kaelon Black at 90, and six more picks in rounds four and five.",
+    "<strong>Ricky Pearsall</strong> is out for the season after knee surgery. Kittle's availability is being managed."
+  ],
+  up:[
+    "Twelve wins through that injury list is a remarkable coaching performance. Kyle Shanahan's system continues to hold up under replacement personnel.",
+    "Getting Warner, Bosa, and Purdy back at once is the biggest health-driven upgrade any contender has available.",
+    "Evans plus Odighizuwa fills the two most obvious holes with proven veterans.",
+    "SRS of 6.0 was fourth best in the NFC even with all the missed time, so the underlying team was strong."
+  ],
+  down:[
+    "The draft class was widely criticized as a reach, and the trade-downs produced quantity rather than quality.",
+    "The skill group is aging and injury-prone. Evans is 33, Kittle is being managed, and Pearsall is gone for the year.",
+    "Their win total dropped despite outperforming expectations, which reflects how much the market attributes 2025 to variance.",
+    "They play in a division with the two best teams in the conference and have to face both twice."
+  ]
+},
+{
+  ab:"ARI", name:"Arizona Cardinals", conf:"NFC", div:"NFC West", color:"#97233F",
+  rec:"3-14", pf:355, pa:488, pd:-133, srs:-4.4, wt:3.5, rank:30,
+  sub:"Mike LaFleur takes over. Kyler Murray is gone.",
+  facts:[
+    "Won three games and lost their final nine. Released <strong>Kyler Murray</strong>, who signed with Minnesota.",
+    "Hired <strong>Mike LaFleur</strong>, the Rams' offensive coordinator and Matt LaFleur's brother, as head coach. He is the franchise's sixth consecutive first-time head coach.",
+    "Drafted RB <strong>Jeremiyah Love</strong> third overall, the highest-drafted running back since Saquon Barkley, then QB <strong>Carson Beck</strong> at 65 and guard Chase Bisontis at 34.",
+    "Extended WR <strong>Michael Wilson</strong> during the preseason.",
+    "Carry the lowest win total in the league at 3.5 and face the fourth hardest projected schedule."
+  ],
+  up:[
+    "LaFleur comes from the best offensive staff in football and knows the NFC West intimately from stints with both the Rams and 49ers.",
+    "Love is an explosive, three-down back who should immediately raise the offense's floor.",
+    "Sharp Football's read is that the roster is better than Miami's and the quarterback situation is better than Cleveland's. Some of the low ranking is division, not talent.",
+    "Beck at 65 gives them a developmental option without spending premium capital, and the 2027 draft position should be strong."
+  ],
+  down:[
+    "The defense remains the major problem and was not meaningfully addressed. They allowed 488 points last year.",
+    "They play in the toughest division in the NFC with the Super Bowl champion and the Super Bowl favorite in it.",
+    "<strong>Jacoby Brissett</strong> is the starter after a 3,366-yard, 23-touchdown run over the final 12 games of 2025, but that is a ceiling question rather than an answer. Rookie guard Chase Bisontis is out most or all of the year with an MCL injury.",
+    "The fourth hardest schedule combined with a bottom-three roster is why they are the consensus pick for the worst record in football."
+  ]
+}
+];
+
+/* ============================================================
+   WEEKS. Each week is one object. Add a week by appending here.
+   Every team gets exactly three sections:
+     summary   (recap: last game / week 1: matchup preview)   tone "n"
+     Positives (what came out of the game for them)             tone "up"
+     Negatives (what came out of the game against them)         tone "down"
+   ============================================================ */
+
+const S = (t, tone, items) => ({t, tone, items: items || []});
+const P3 = (preview, pos, neg, label) => [S(label||"Matchup preview","n",preview), S("Positives","up",pos), S("Negatives","down",neg)];
+
+const WEEK1 = {
+  id:"wk1", label:"Week 1", type:"outlook", status:"live",
+  dates:"Wednesday, September 9 to Monday, September 14, 2026",
+  headline:"All 32 teams open across four days",
+  intro:"Sixteen games, no byes, and a slate that runs Wednesday through Monday. The season opens with a Super Bowl LX rematch at Lumen Field, then moves to Melbourne on Thursday for the first NFL regular season game played in Australia. Everything below is pregame. Once Week 1 is played, the preview panel for each team becomes a game summary and the positives and negatives are rewritten around what actually happened.",
+  games:[
+    {away:"NE",home:"SEA",day:"Wed Sep 9",time:"8:20 PM ET",tv:"NBC / Peacock",venue:"Lumen Field, Seattle",note:"Super Bowl LX rematch. Seattle won it 29-13."},
+    {away:"SF",home:"LAR",day:"Thu Sep 10",time:"8:35 PM ET",tv:"Netflix",venue:"Melbourne Cricket Ground, Australia",note:"First NFL regular season game in Australia. Rams are the designated home team."},
+    {away:"CHI",home:"CAR",day:"Sun Sep 13",time:"1:00 PM ET",tv:"FOX",venue:"Bank of America Stadium, Charlotte",note:"Carolina opens without both starting tackles."},
+    {away:"TB",home:"CIN",day:"Sun Sep 13",time:"1:00 PM ET",tv:"FOX",venue:"Paycor Stadium, Cincinnati",note:"Burrow's first game since the 2025 injury that cost him nine starts."},
+    {away:"NO",home:"DET",day:"Sun Sep 13",time:"1:00 PM ET",tv:"FOX",venue:"Ford Field, Detroit",note:"Detroit opens with both starting safeties on PUP."},
+    {away:"ATL",home:"PIT",day:"Sun Sep 13",time:"1:00 PM ET",tv:"FOX",venue:"Acrisure Stadium, Pittsburgh",note:"Two new head coaches. Rodgers and McCarthy reunited."},
+    {away:"BUF",home:"HOU",day:"Sun Sep 13",time:"1:00 PM ET",tv:"CBS",venue:"NRG Stadium, Houston",note:"Joe Brady's head coaching debut. Buffalo has not won in Houston since 2006."},
+    {away:"BAL",home:"IND",day:"Sun Sep 13",time:"1:00 PM ET",tv:"CBS",venue:"Lucas Oil Stadium, Indianapolis",note:"Jesse Minter's debut. Daniel Jones back from injury."},
+    {away:"CLE",home:"JAX",day:"Sun Sep 13",time:"1:00 PM ET",tv:"CBS",venue:"EverBank Stadium, Jacksonville",note:"Deshaun Watson starts for Cleveland, named August 25."},
+    {away:"NYJ",home:"TEN",day:"Sun Sep 13",time:"1:00 PM ET",tv:"CBS",venue:"Nissan Stadium, Nashville",note:"Two of last season's three-win teams. Saleh and Glenn both under pressure."},
+    {away:"MIA",home:"LV",day:"Sun Sep 13",time:"4:25 PM ET",tv:"FOX",venue:"Allegiant Stadium, Las Vegas",note:"Two rookie head coaches. Cousins starts over Mendoza."},
+    {away:"WAS",home:"PHI",day:"Sun Sep 13",time:"4:25 PM ET",tv:"FOX",venue:"Lincoln Financial Field, Philadelphia",note:"Philadelphia's first game of the post A.J. Brown era."},
+    {away:"ARI",home:"LAC",day:"Sun Sep 13",time:"4:25 PM ET",tv:"CBS",venue:"SoFi Stadium, Inglewood",note:"Expected return of Joe Alt and Rashawn Slater."},
+    {away:"GB",home:"MIN",day:"Sun Sep 13",time:"4:25 PM ET",tv:"CBS",venue:"U.S. Bank Stadium, Minneapolis",note:"Kyler Murray starts for Minnesota. Parsons unavailable for Green Bay."},
+    {away:"DAL",home:"NYG",day:"Sun Sep 13",time:"8:20 PM ET",tv:"NBC / Peacock",venue:"MetLife Stadium, East Rutherford",note:"128th regular season meeting. John Harbaugh's Giants debut."},
+    {away:"DEN",home:"KC",day:"Mon Sep 14",time:"8:15 PM ET",tv:"ESPN / ABC",venue:"Arrowhead Stadium, Kansas City",note:"Mahomes on track but not formally cleared. Justin Fields starts if he cannot go."}
+  ],
+  teams:{
+
+/* ---------- AFC EAST ---------- */
+NE:{headline:"Opens the season where it ended, at Lumen Field", sections:P3(
+  ["At Seattle, Wednesday 8:20 PM ET on NBC. A rematch of Super Bowl LX seven months later, in the building of the team that beat them 29-13.","That night New England scored zero first-half points on four first downs and 51 yards, the third fewest in a Super Bowl half. Drake Maye finished with 295 yards and two touchdowns but three turnovers and six sacks.","<strong>A.J. Brown</strong> makes his Patriots debut. First-round tackle <strong>Caleb Lomu</strong> was drafted to fix the protection this exact matchup exposed."],
+  ["Brown gives Maye a true outside No. 1 for the first time. Romeo Doubs and the tight ends fill in behind him.","The defense returns most of a unit that allowed 320 points, sixth fewest in the league, built around CB Christian Gonzalez and DT Milton Williams.","Continuity on both coordinator staffs in year two under Vrabel is a real September edge."],
+  ["Rookie RB <strong>TreVeyon Henderson</strong> missed consecutive practices with an ankle and is in real danger of sitting. Rhamondre Stevenson carries the load with recent trade pickup Corey Kiner the only other back.","The 14-3 record came against a soft schedule and this year's slate projects sixth hardest. SRS of 5.5 says they were closer to an 11-win team.","Kyle Dugger left for Pittsburgh, thinning the safety room."]
+)},
+SEA:{headline:"Defending champions host the team they beat", sections:P3(
+  ["Home against New England, Wednesday 8:20 PM ET on NBC. First Wednesday opener since 2012.","Seattle beat New England 29-13 in Super Bowl LX. Jason Myers kicked five field goals, a Super Bowl record, and did all the scoring through three quarters. Kenneth Walker III ran for 135 and won MVP.","Best SRS in football last year at 12.8 and the fewest points allowed at 292."],
+  ["<strong>Jaxon Smith-Njigba</strong> is the reigning Offensive Player of the Year after 119 catches and a league-leading 1,793 yards, and the passing game returns intact.","<strong>Mike Macdonald</strong> is regarded as one of the best coaches in the game and the defense was historically good.","They already beat the Rams twice in one season, which is the specific test the division comes down to again."],
+  ["OC <strong>Klint Kubiak</strong> left for the Raiders head job, rated the most damaging departure of the offseason. The replacement is unproven.","Walker signed with Kansas City and <strong>Zach Charbonnet</strong> is on PUP for four games, so rookie <strong>Jadarian Price</strong> is the lead back with George Holani spelling him.","Lost edge Boye Mafe and DBs Coby Bryant and Riq Woolen. CB <strong>Terrion Arnold</strong>, acquired from Detroit, is on the commissioner exempt list. Win total dropped three and a half games to 10.5."]
+)},
+BUF:{headline:"Joe Brady's first game as a head coach", sections:P3(
+  ["At Houston, Sunday 1:00 PM ET on CBS. Buffalo has not won in Houston since 2006.","<strong>Joe Brady</strong> makes his head coaching debut after the Sean McDermott firing, against the AFC's best scoring defense from 2025.","Buffalo went 12-5, lost the division for the first time since 2019, and fell at Denver in overtime in the divisional round."],
+  ["<strong>James Cook</strong> led the NFL with 1,621 rushing yards and <strong>D.J. Moore</strong> arrives as the first real No. 1 receiver Josh Allen has had since 2023.","Brady already ran this offense, so there is no scheme reset to work through.","<strong>Bradley Chubb</strong> and 35th pick <strong>T.J. Parker</strong> replace the lost pass rush. Buffalo has cleared its win total six straight years and sits at 10.5 again."],
+  ["Safety <strong>C.J. Gardner-Johnson</strong> strained a calf in August and GM Brandon Beane says he is now dealing with a different injury. He may not play.","LB <strong>Terrel Bernard</strong> is uncertain with an undisclosed late-camp injury. WR Khalil Shakir has an undisclosed issue, though the team is optimistic.","First-time head coach, first time building a staff, and a road opener against a top-two defense is close to the worst possible draw."]
+)},
+HOU:{headline:"Best defense in the AFC hosts Buffalo", sections:P3(
+  ["Home against Buffalo, Sunday 1:00 PM ET on CBS.","Houston started 0-3 in 2025, then won 12 of 14 including a nine game closing streak, before losing to New England in the divisional round.","Allowed 295 points, second fewest in the AFC. DSRS of 7.2 led the conference outright."],
+  ["The defense is the most complete unit in the division and one of the best in the league, and it faces a Buffalo offense breaking in a new head coach.","Four of the first six draft picks went to the trenches, headlined by guard <strong>Keylan Rutledge</strong> at 26, which is exactly the criticism this roster faced for two years.","<strong>David Montgomery</strong> arrives from Detroit as the closing-game back a low-scoring team needs. Third straight year of 10-plus wins."],
+  ["<strong>Jayden Higgins</strong> tore his ACL in camp and is out for the season. The team traded for <strong>Kayshon Boutte</strong>, who starts opposite Nico Collins with Jaylin Noel in the slot.","<strong>Tank Dell</strong> and OT <strong>Braden Smith</strong> both opened on injured reserve for at least four games. The line starts two rookies and just lost a tackle.","The open question analysts keep circling: is C.J. Stroud a top-tier quarterback or a good one on a great defense?"]
+)},
+NYJ:{headline:"Geno Smith debuts against a fellow rebuild", sections:P3(
+  ["At Tennessee, Sunday 1:00 PM ET on CBS. Two of last season's three-win teams open against each other.","<strong>Geno Smith</strong> makes his Jets debut after arriving from Las Vegas. Aaron Glenn survived 3-14 and is coaching for his job.","New York scored 300 points and allowed 503 last year, the worst differential in the league outside Las Vegas."],
+  ["No. 2 overall pick <strong>David Bailey</strong> has been the most talked about rookie pass rusher of camp. <strong>Minkah Fitzpatrick</strong> arrived by trade and signed a three year, $40 million extension.","Smith is a functional starter, a large upgrade over 2025. Rookies <strong>Omar Cooper Jr.</strong> and TE <strong>Kenyon Sadiq</strong> are the young pass catchers, and Younghoe Koo is the kicker.","Enters the season healthy at the skill positions. Sharp Football moved them up two spots out of camp."],
+  ["Depth is thin nearly everywhere. One injury at quarterback puts them right back where they were.","Trading Sauce Gardner returned two first-round picks but stripped the one elite player on the defense.","Most projections top out near seven wins against a 5.5 total. The ceiling here is respectability."]
+)},
+TEN:{headline:"Saleh and Daboll begin the Cam Ward rebuild", sections:P3(
+  ["Home against the Jets, Sunday 1:00 PM ET on CBS.","<strong>Robert Saleh</strong>'s head coaching debut with <strong>Brian Daboll</strong> calling plays. Tennessee scored 284 points last year against the hardest schedule in the league.","No major injuries reported entering the opener."],
+  ["<strong>Cam Ward</strong> finally has weapons. <strong>Carnell Tate</strong> went fourth overall and <strong>Wan'Dale Robinson</strong> signed for four years and $78 million to reunite with Daboll.","The draft class was one of the most praised in the league. Edge <strong>Keldric Faulk</strong> (31st) and LB <strong>Anthony Hill Jr.</strong> (60th) project as immediate starters, and DL <strong>John Franklin-Myers</strong> signed a large deal.","A Jets opener is as winnable as this schedule gets."],
+  ["Still a bottom-five roster in most evaluations. Two good hires do not close a 194-point gap in one year.","Cornerback spending was the most criticized part of the offseason. Analysts think they paid market rate for below-market play.","Ward is learning a new system with a new play caller in the same building he struggled in. Total is 6.5."]
+)},
+MIA:{headline:"Malik Willis starts a full teardown", sections:P3(
+  ["At Las Vegas, Sunday 4:25 PM ET on FOX. Two rookie head coaches in <strong>Jeff Hafley</strong> and Klint Kubiak.","<strong>Malik Willis</strong> begins his run as Miami's starter. Tagovailoa, Waddle, Hill, Fitzpatrick, Phillips, and Chubb are all gone.","Ranked last or near-last in most preseason power rankings with the joint lowest win total at 4.5."],
+  ["Hafley ran a top ten defense in Green Bay twice and the defensive free agent additions were the better-regarded half of the offseason.","First-round tackle <strong>Kadyn Proctor</strong> is a decade-long fixture if he hits. Thirteen picks plus a clean cap sheet is where a rebuild wants to be.","Rookie WR Chris Bell is back from a torn ACL and off the NFI list, easing in as a rotational piece with Jalen Tolbert."],
+  ["The receiver room is widely rated the weakest in the league, which makes evaluating Willis close to impossible.","Second hardest projected schedule in the NFL.","Any veteran still on the roster is a trade candidate by October, which usually makes the record worse before it gets better."]
+)},
+LV:{headline:"Kirk Cousins starts, Mendoza waits", sections:P3(
+  ["Home against Miami, Sunday 4:25 PM ET on FOX.","<strong>Kirk Cousins</strong> starts and No. 1 overall pick <strong>Fernando Mendoza</strong> opens as the backup. <strong>Klint Kubiak</strong> coaches his first game months after calling plays for a Super Bowl winner.","Las Vegas scored 241 points last year, fewest in the league, and allowed 432."],
+  ["Mendoza is the most regarded quarterback prospect in several drafts and does not have to be rushed.","The line rebuild around center <strong>Tyler Linderbaum</strong> directly addresses why the offense could not score. $281.5 million went out on the first day of free agency.","Ashton Jeanty and Maxx Crosby are real building blocks who were wasted on a three-win roster."],
+  ["<strong>Ashton Jeanty</strong> suffered an ankle injury in camp that was first feared to be worse. Kubiak is optimistic he plays, but rookie Mike Washington carved out a role and could eat into the workload.","The strongest division in football. Even a much better team can finish 5-11 here.","The only win total on the board to move in the final three weeks of preseason, down a full game to 5.5."]
+)},
+
+/* ---------- AFC NORTH ---------- */
+BAL:{headline:"Jesse Minter's first game after 18 years of Harbaugh", sections:P3(
+  ["At Indianapolis, Sunday 1:00 PM ET on CBS.","<strong>Jesse Minter</strong>'s head coaching debut. This is the first Ravens game since 2007 without John Harbaugh on the sideline.","Baltimore went 8-9 with <strong>Lamar Jackson</strong> missing four games and playing hurt in others, yet still outscored opponents by 26."],
+  ["A healthy Jackson plus a positive point differential in a losing season is the textbook bounce-back profile, and the market agrees with an 11.5 win total.","<strong>Trey Hendrickson</strong> signed to fix the pass rush, the defense's clearest 2025 failure. <strong>Jaire Alexander</strong> and Tre'Davious White rebuilt the corner room cheaply.","No significant injuries reported. Zay Flowers had a quad contusion in camp and was day to day."],
+  ["Eighteen years of institutional stability walked out the door, and OC Todd Monken left for the Browns head job. The offensive identity is being rebuilt.","Jackson's durability is now a live question, and there is no version of 11.5 wins with a backup.","The market has priced in the bounce-back fully. Very little room for anything to go wrong."]
+)},
+IND:{headline:"Daniel Jones back from the injury that ended the season", sections:P3(
+  ["Home against Baltimore, Sunday 1:00 PM ET on CBS.","Indianapolis started 7-1 and held the AFC's top seed after Week 8, then lost eight of nine including a seven-game closing streak after <strong>Daniel Jones</strong> went down.","Jones signed a two-year, $88 million extension and starts. Shane Steichen and Chris Ballard were both retained."],
+  ["The offense scored 466 points, fourth most in the AFC. OSRS of 5.9 says the collapse was about who was on the field.","<strong>Sauce Gardner</strong>, acquired for two first-round picks, is a true shutdown corner who changes what a defense can call.","WR <strong>Alec Pierce</strong> (ankle) is expected to be active after signing a four-year extension. A 7.5 win total gives a healthy season plenty of room."],
+  ["Pierce missed most of the offseason and preseason, and <strong>Michael Pittman Jr.</strong> was traded to Pittsburgh, so the receiver room is thin behind Josh Downs.","DSRS was negative in 2025 and the front seven still has holes despite the Gardner investment.","Nobody in the building is coaching with a clean slate after a seven-game losing streak."]
+)},
+PIT:{headline:"Mike McCarthy and Aaron Rodgers, reunited", sections:P3(
+  ["Home against Atlanta, Sunday 1:00 PM ET on FOX. Two new head coaches.","<strong>Mike McCarthy</strong>'s first game replacing Mike Tomlin. <strong>Aaron Rodgers</strong> starts, reuniting with McCarthy from their Green Bay years.","Pittsburgh won the AFC North at 10-7 with a plus 10 differential, the thinnest of any division winner."],
+  ["The receiver room was rebuilt around Rodgers with <strong>Michael Pittman Jr.</strong> by trade and rookie <strong>Germie Bernard</strong>. First-round tackle <strong>Max Iheanachor</strong> addresses a line that has capped this offense for years.","If <strong>T.J. Watt</strong> returns to form the defense has a top-five ceiling, and Kyle Dugger signed from New England.","No significant injuries reported. QB <strong>Drew Allar</strong> (76th pick) is the succession plan."],
+  ["A plus 10 differential and an SRS of 0.1 in a 10-win season is the clearest regression signal on the board.","Rodgers at this stage carries obvious physical and locker room risk, and McCarthy's Dallas tenure ended without a deep run.","Analyst rank of 20 sits well below the public perception of this roster."]
+)},
+ATL:{headline:"Tua starts, Penix inactive", sections:P3(
+  ["At Pittsburgh, Sunday 1:00 PM ET on FOX.","<strong>Tua Tagovailoa</strong> starts. <strong>Michael Penix Jr.</strong> is inactive, and per Rapoport he did not believe he was ready. The expectation is that Penix takes over once healthy.","<strong>Kevin Stefanski</strong>'s first game in Atlanta after two Coach of the Year awards in Cleveland. Atlanta closed 2025 on a four-game winning streak."],
+  ["<strong>Bijan Robinson</strong>, <strong>Drake London</strong>, and second-team All-Pro <strong>Kyle Pitts</strong> is a genuinely good skill trio that underperformed its personnel under the last staff.","Stefanski is one of the more respected hires of the cycle, and the NFC South has been won with eight wins two years running.","CB <strong>Avieon Terrell</strong> (48th) joins his brother A.J. in the secondary."],
+  ["The quarterback room is the worst kind: two options, neither clearly better, and the starter named out of necessity.","No first-round pick as a result of the 2025 trade up for James Pearce Jr., and the defense finished with a negative DSRS.","Win total dropped to 6.5 despite the strong finish. Analyst rank sits at 28."]
+)},
+CIN:{headline:"Burrow's first game back, and a funded defense", sections:P3(
+  ["Home against Tampa Bay, Sunday 1:00 PM ET on FOX.","<strong>Joe Burrow</strong>'s first regular season game since the injury that cost him nine starts. The offense still scored 414 points without him for most of the year.","The only AFC North team that did not change head coaches."],
+  ["The defensive rebuild finally got funded: DT <strong>Dexter Lawrence II</strong> by trade and edge <strong>Boye Mafe</strong> from Seattle, plus rookies Cashius Howell and Tacario Davis.","<strong>Ja'Marr Chase</strong> (knee) and <strong>Tee Higgins</strong> (heel) both practiced Monday and are tracking to play without restriction.","Third easiest projected schedule in the league. Even a middling defense makes this a playoff team."],
+  ["The offensive line is still the unresolved question and the reason the injury risk never fully goes away.","Allowed 492 points last year. One offseason of spending does not undo a bottom-tier back seven.","Analysts who have been low on Cincinnati stayed low. Sharp has them 11th against a 10.5 total."]
+)},
+TB:{headline:"Baker Mayfield healthy, Mike Evans gone", sections:P3(
+  ["At Cincinnati, Sunday 1:00 PM ET on FOX.","Tampa Bay started 6-2 in 2025, then lost seven of nine and missed the playoffs. <strong>Baker Mayfield</strong> played hurt through the collapse and is expected back healthy.","<strong>Mike Evans</strong> signed with San Francisco, ending a franchise era."],
+  ["<strong>Rueben Bain Jr.</strong> (15th) was the most productive edge rusher in the draft and fills the defense's clearest need immediately.","Most analysts have them as the best team in the NFC South.","WR <strong>Emeka Egbuka</strong> missed three weeks with turf toe but practiced Monday and is expected to play, likely with a designation."],
+  ["Replacing Evans is not solved. The receiver room is young and unproven behind Godwin and Egbuka.","Second-half collapses have happened in consecutive seasons under this staff.","DSRS was negative and the secondary is the thinnest part of the roster. Total is 8.5."]
+)},
+CLE:{headline:"Todd Monken's debut with the QB room settled", sections:P3(
+  ["At Jacksonville, Sunday 1:00 PM ET on CBS.","<strong>Todd Monken</strong>'s first game as a head coach. <strong>Deshaun Watson</strong> starts with Shedeur Sanders backing up. Monken named him August 25 and said it is not a week to week call.","Cleveland scored 279 points last year, second fewest in the league."],
+  ["The line was rebuilt in earnest: guard <strong>Zion Johnson</strong> near $50 million over three years and tackle <strong>Spencer Fano</strong> at No. 9.","Edge <strong>Jared Verse</strong> came back in the Garrett trade and 2025 Defensive Rookie of the Year <strong>Carson Schwesinger</strong> anchors the second level.","Easiest projected schedule in the NFL. Rookies Denzel Boston and KC Concepcion start alongside Jerry Jeudy."],
+  ["There is no credible starting quarterback on the roster. Analysts are near-unanimous that Watson cannot be the plan.","Losing Myles Garrett and DC Jim Schwartz in one offseason strips the defense of its best player and its architect.","WR Isaiah Bond was evaluated for a concussion in the preseason finale. Total is 5.5, analyst rank 31."]
+)},
+JAX:{headline:"Defending the division after a four-win jump", sections:P3(
+  ["Home against Cleveland, Sunday 1:00 PM ET on CBS.","Liam Coen's second season after taking Jacksonville from four wins to 13 and the AFC South title. Lost at home to Buffalo in the wild card round.","SRS of 8.7 was the best in the division and third in the AFC."],
+  ["Coen's system produced immediate improvement and the core of the offense is intact. Trevor Lawrence gets a full offseason in a scheme that worked.","<strong>Jakobi Meyers</strong>, extended for three years and $60 million after the deadline trade, is a captain. Brian Thomas Jr. is back for the opener. Traded for CB <strong>Tyson Campbell</strong>.","A Cleveland opener against the league's weakest projected roster is a favorable start."],
+  ["RB <strong>LeQuint Allen Jr.</strong> (soft tissue) is unlikely to play. Coen said he would be pleasantly surprised, so Bhayshul Tuten inherits the third-down role.","Lost leading back <strong>Travis Etienne Jr.</strong> to New Orleans and LB <strong>Devin Lloyd</strong> to Carolina.","Turnover luck is the central bear case. The win total dropped four games to 8.5, and Houston looks like the more complete roster."]
+)},
+
+/* ---------- AFC WEST ---------- */
+DEN:{headline:"Monday night at Arrowhead to open the year", sections:P3(
+  ["At Kansas City, Monday 8:15 PM ET on ESPN and ABC.","Denver tied for the league's best record at 14-3 and reached the AFC Championship Game. Eleven of those wins came by one score, tying an NFL record.","Denver expects Mahomes at full strength. Josh Simmons is not expected to start at tackle for Kansas City."],
+  ["<strong>Jaylen Waddle</strong>, acquired for first, third, and fourth round picks, gives Bo Nix a separator on the outside for the first time.","The defense allowed 311 points and returns largely intact with a DSRS of 3.5 and no reliance on expiring deals.","Sean Payton has a ring and Denver's home field is one of the AFC's hardest, though the opener is on the road."],
+  ["Eleven one-score wins is the loudest regression signal in the league. SRS of 3.5 tells the real story behind 14-3, and the total dropped four and a half games to 9.5.","OLB <strong>Jonathan Cooper</strong> was placed on the commissioner exempt list and is unavailable.","Analysts remain unconvinced Nix is good enough to lead a Super Bowl team, and the run game is a question."]
+)},
+KC:{headline:"Mahomes on track but not formally cleared", sections:P3(
+  ["Home against Denver, Monday 8:15 PM ET on ESPN and ABC.","<strong>Patrick Mahomes</strong> tore his ACL and LCL in December, took every first team rep in camp, and sat out the preseason by design. Andy Reid said Tuesday there is a good chance he starts. <strong>Justin Fields</strong> goes if he cannot.","Kansas City won six games, its fewest since 2012, on a 1-9 record in one-score games with a positive point differential."],
+  ["A 1-9 record in one-score games is close to pure variance. The 10.5 total reflects near-total confidence 2025 was an aberration.","<strong>Kenneth Walker III</strong>, the Super Bowl MVP, fixes a run game that had been missing for seasons, and a run-heavy script early suits Mahomes' return.","CB <strong>Mansoor Delane</strong> (6th) and DT <strong>Peter Woods</strong> (29th) are premium-position rookies on a defense that already had a 3.8 DSRS."],
+  ["A quarterback returning from a torn ACL at 31 is not guaranteed to return to form, especially one whose game depends on escapability.","Traded CB Trent McDuffie and guard Joe Thuney, two of the best players at their positions. Simmons not starting at tackle adds to the line worries.","The sharpest critique this year is that the roster is no longer elite and Mahomes has been carrying it."]
+)},
+LAC:{headline:"Alt and Slater expected back on the field", sections:P3(
+  ["Home against Arizona, Sunday 4:25 PM ET on CBS.","Slated to mark the return of All-Pro tackles <strong>Joe Alt</strong> and <strong>Rashawn Slater</strong>, who missed most of 2025. <strong>Mike McDaniel</strong> calls his first game as Chargers coordinator.","Los Angeles won 11 games despite the tackle injuries, with a plus 28 differential."],
+  ["Two All-Pro tackles back is functionally a major free agency haul that cost nothing, and McDaniel is one of the most inventive play designers in football.","Justin Herbert is a common top-three MVP pick. Sharp Football ranks them fifth and calls the 9.5 total soft.","New DC <strong>Chris O'Leary</strong> is expected to keep the Minter scheme. Added edge Odafe Oweh, TE Charlie Kolar, DT Dalvin Tomlinson, and RB Keaton Mitchell."],
+  ["Center <strong>Tyler Biadasz</strong> is expected out for an extended stretch, so rookie <strong>Jake Slaughter</strong> starts in the middle of the line that was supposed to be the offseason's big fix.","Slater had a knee flare-up in August that cost him more than a week of practice. He is expected to start, but the injury history is real.","A plus 28 differential in an 11-win season says they were closer to average than the record. Losing Minter is still a change."]
+)},
+ARI:{headline:"Mike LaFleur's debut in a building he knows", sections:P3(
+  ["At the Chargers, Sunday 4:25 PM ET on CBS.","<strong>Mike LaFleur</strong>'s first game as a head coach, in the stadium where he spent three years as Rams coordinator. He is Arizona's sixth straight first-time head coach.","<strong>Jacoby Brissett</strong> is the starter after 3,366 yards and 23 touchdowns over the final 12 games of 2025. Kyler Murray was released and signed with Minnesota."],
+  ["LaFleur comes from the best offensive staff in football and knows the NFC West intimately.","<strong>Jeremiyah Love</strong> at No. 3 is the highest-drafted back since Saquon Barkley. LaFleur feels good about his availability after an ankle cost him four weeks.","Sharp's read is that the roster is better than Miami's and the quarterback room better than Cleveland's. Some of the low ranking is the division."],
+  ["Rookie guard <strong>Chase Bisontis</strong> is out most or all of the season with an MCL injury, forcing Isaiah Adams in at right guard next to newly signed tackle Elijah Wilkinson. The line ranked 26th last year.","Love is listed behind Tyler Allgeier on the depth chart and may be eased in.","The defense allowed 488 points and was not meaningfully addressed. Lowest win total in the league at 3.5 against the fourth hardest schedule."]
+)},
+
+/* ---------- NFC EAST ---------- */
+PHI:{headline:"First game of the post A.J. Brown era", sections:P3(
+  ["Home against Washington, Sunday 4:25 PM ET on FOX. A divisional opener.","Philadelphia won the NFC East at 11-6 but started 8-2 and lost five of its last eight before a wild card exit to San Francisco.","<strong>A.J. Brown</strong> was traded to New England. <strong>DeVonta Smith</strong> steps into the No. 1 role, with rookie <strong>Makai Lemon</strong>, TE <strong>Eli Stowers</strong>, <strong>Dontayvion Wicks</strong>, and Hollywood Brown behind him."],
+  ["May be the best defense in the NFC after adding edge <strong>Jonathan Greenard</strong> and CB <strong>Riq Woolen</strong> to a unit that already had the conference's third best DSRS.","The bar for the offense is low. It scored only 379 points last year with Brown on it.","No significant injuries reported. Front seven and offensive line continuity remains among the best in football. Cleared 10.5 wins four straight years."],
+  ["Losing an alpha receiver rarely improves an offense. Hurts loses his most reliable contested-catch target.","New play caller <strong>Sean Mannion</strong> is an unknown, and the second-half fade is now a pattern that has ended two straight seasons.","Dallas rebuilt its defense and the division is no longer a walk."]
+)},
+WAS:{headline:"Jayden Daniels opens without his left tackle", sections:P3(
+  ["At Philadelphia, Sunday 4:25 PM ET on FOX.","Washington fell from 12 wins and an NFC title game to 5-12. <strong>Jayden Daniels</strong> missed seven games and the team went 2-5 without him.","New DC <strong>Daronte Jones</strong> takes over a unit that allowed 451 points."],
+  ["Daniels healthy is the whole difference. The 2024 version of this team went to a conference championship with much the same core.","<strong>Stefon Diggs</strong> plus Terry McLaurin gives the offense a real two-receiver structure.","LB <strong>Sonny Styles</strong> (7th overall, fully guaranteed) projects as an immediate three-down starter. No meaningful injuries reported beyond Tunsil."],
+  ["<strong>Laremy Tunsil</strong> is expected to miss most of the season. The offensive line was already the unsolved problem, and now it opens against Philadelphia's front.","Daniels' injury history is two seasons long and his running style is central to the offense.","A minus 95 differential is a lot of ground with both Philadelphia and Dallas looking stronger."]
+)},
+DAL:{headline:"Sunday night at MetLife with a rebuilt defense", sections:P3(
+  ["At the Giants, Sunday 8:20 PM ET on NBC. The 128th regular season meeting in a rivalry dating to 1960.","Dallas went 7-9-1 with the fifth highest scoring offense in football at 27.7 points per game and one of its worst defenses, DSRS minus 8.7.","No significant injuries reported. Dallas enters the season healthy."],
+  ["The largest single-offseason defensive talent injection of any team: safety <strong>Caleb Downs</strong> (11th), edge <strong>Malachi Lawrence</strong> (23rd), edge <strong>Rashan Gary</strong> by trade, and <strong>Quinnen Williams</strong> from November.","The Lamb and Pickens pairing is one of the best receiver duos in the league. A minus 40 differential with 471 points scored means a competent defense swings several games.","Sharp moved them up four spots out of camp and calls them underrated."],
+  ["Rebuilding a defense that bad in one offseason with two rookies starting is a lot to ask.","Brian Schottenheimer is still unproven, and the 2025 record came against a soft schedule.","The interior defensive line got worse in raw terms after losing Odighizuwa and Thomas."]
+)},
+NYG:{headline:"John Harbaugh's first game in blue", sections:P3(
+  ["Home against Dallas, Sunday 8:20 PM ET on NBC.","<strong>John Harbaugh</strong>'s Giants debut after 18 seasons in Baltimore, with <strong>Matt Nagy</strong> on offense and <strong>Dennard Wilson</strong> on defense.","New York went 4-13. Brian Daboll was fired in November at 2-8."],
+  ["Harbaugh is the most accomplished hire of the cycle and inherits a young roster: <strong>Jaxson Dart</strong>, <strong>Cam Skattebo</strong>, <strong>Malik Nabers</strong>.","LB <strong>Arvell Reese</strong> (5th) and guard <strong>Francis Mauigoa</strong> (10th) both project as immediate starters. The class was widely praised.","Thirteen wins over three seasons means the bar for visible improvement is very low. Total is 7.5."],
+  ["<strong>Malik Nabers</strong> is coming off the torn ACL from Week 4 of 2025. Latest reporting says he has a chance to play, but practice this week decides it, and the depth behind him is thin.","Trading <strong>Dexter Lawrence</strong> left a hole. The defensive line remains the roster's weak spot.","Dart is unproven and Nagy's record as a coordinator is mixed."]
+)},
+
+/* ---------- NFC NORTH ---------- */
+CHI:{headline:"Ben Johnson's second season starts in Charlotte", sections:P3(
+  ["At Carolina, Sunday 1:00 PM ET on FOX.","Chicago won 11 games and the NFC North in Johnson's first year, then beat Green Bay in the wild card round after trailing 21-3 at half.","Faces the NFL's toughest projected schedule in 2026."],
+  ["Johnson's offense scored 441 points in year one and Caleb Williams improved visibly, nearly reaching 4,000 yards.","Safety <strong>Dillon Thieneman</strong> (25th) headlines the class, and Carolina opens without both starting tackles, which favors Chicago's front.","Already beat Green Bay in January, removing a barrier this franchise carried for years."],
+  ["Safety <strong>Coby Bryant</strong> is out four to six months after August knee surgery. CB <strong>Kyler Gordon</strong> (calf) and DB Dallis Flowers are also on injured reserve. Veteran Xavier Woods was signed to fill in.","WR <strong>Rome Odunze</strong> has not practiced this week with a leg injury. Johnson is hopeful for Sunday. RB Kyle Monangai is week to week with a hyperextended knee.","Center Drew Dalman retired unexpectedly, so rookie <strong>Logan Jones</strong> snaps to Williams. A plus 26 differential and SRS of 0.5 say this was closer to a nine-win team."]
+)},
+CAR:{headline:"Defending division champs open without both tackles", sections:P3(
+  ["Home against Chicago, Sunday 1:00 PM ET on FOX.","Carolina won the NFC South at 8-9, its first playoff trip since 2017, then lost a wild card shootout to the Rams.","<strong>Tetairoa McMillan</strong> won Offensive Rookie of the Year. TE <strong>Darren Waller</strong> signed a one-year deal in August after six touchdowns in nine games with Miami."],
+  ["Traded for edge <strong>Jaelan Phillips</strong> and signed LB <strong>Devin Lloyd</strong>, two genuine difference-makers on a defense that already had a positive DSRS.","Free agent tackle Rasheed Walker and rookie <strong>Monroe Freeling</strong> (19th) matter more than usual given who is out.","Sharp's read is that the roster is solidly mid-pack when judged separately from the doubts about Bryce Young."],
+  ["Both starting tackles are out at least four games. <strong>Ikem Ekwonu</strong> is on reserve PUP and <strong>Taylor Moton</strong> on reserve NFI. That is a severe problem for a quarterback who struggles under pressure.","RB Jonathan Brooks has been limited nearly a week with soreness and Chuba Hubbard is questionable, so the backfield is muddied.","Scored only 311 points, fewest of any 2025 playoff team. One outlet has them 32nd."]
+)},
+DET:{headline:"Opens with both starting safeties on PUP", sections:P3(
+  ["Home against New Orleans, Sunday 1:00 PM ET on FOX. A soft opener handed to a last-place finisher.","Detroit fell from 15 wins to 9-8 and last in the NFC North, yet still scored 481 points, second most in the NFC, with a plus 68 differential.","Sixth easiest projected schedule, which is why the total sits at 10.5."],
+  ["<strong>Jahmyr Gibbs</strong> put up 1,223 rushing yards, 77 catches, and 18 touchdowns and is the consensus No. 1 fantasy pick. A New Orleans defense with unresolved questions is a good first opponent.","Tackle <strong>Blake Miller</strong> (17th) addresses the unit most hurt by 2025's injuries.","A positive point differential in a 9-8 season means the underlying team was better than the record."],
+  ["<strong>Brian Branch</strong> and <strong>Kerby Joseph</strong> opened on PUP and <strong>Terrion Arnold</strong> was traded to Seattle. The secondary is the biggest camp story in the league, and DSRS was already negative.","RB <strong>Isiah Pacheco</strong>, signed to replace David Montgomery, is on injured reserve with a back issue. Brad Holmes said only that he hopes Pacheco returns this year. Jacob Saylors and Sione Vaki are the backups.","Sharp dropped them four spots because of the secondary. A 10.5 total with that back end is the number analysts most often call too high."]
+)},
+NO:{headline:"Tyler Shough's first season as the unquestioned starter", sections:P3(
+  ["At Detroit, Sunday 1:00 PM ET on FOX. A tough road opener.","New Orleans went 5-4 in games <strong>Tyler Shough</strong> started and 1-7 in every other game. He enters as the unquestioned starter under second-year coach Kellen Moore.","Second easiest projected schedule in the NFL."],
+  ["The Shough splits are striking. A full season of the quarterback who went 5-4 is a very different team.","<strong>Travis Etienne Jr.</strong> signed from Jacksonville and is set for a heavy Week 1 workload with Kamara sidelined. Devaughn Vele starts opposite Chris Olave.","Moore is in year two of a deliberate youth movement, so the arrow points up even in a mediocre season. Total is 7.5."],
+  ["Rookie WR <strong>Jordyn Tyson</strong>, the eighth overall pick, is on injured reserve with a hamstring and misses at least four games.","<strong>Alvin Kamara</strong> (knee) has not practiced and is expected to be inactive.","The defense has significant question marks the front office largely did not address, and it opens against the NFC's second best offense. Only 306 points scored last year."]
+)},
+GB:{headline:"Opens at Minnesota without Micah Parsons", sections:P3(
+  ["At Minnesota, Sunday 4:25 PM ET on CBS.","Green Bay went 9-7-1, lost its final five, then blew a 21-3 halftime lead in the wild card round at Chicago. Second straight one-and-done.","Third hardest projected schedule."],
+  ["<strong>Jordan Love</strong> has been the sixth most efficient quarterback in EPA per dropback over the last three seasons. Sharp ranks the team fourth on that basis.","The 2025 team had a positive point differential and lost close games late, a profile that usually improves.","The defensive draft class (CB <strong>Brandon Cisse</strong>, DT Chris McClellan, CB Domani Jackson) targets the secondary that broke in the playoff loss."],
+  ["<strong>Micah Parsons</strong> is on a reserve list and unavailable for the first four games.","<strong>Josh Jacobs</strong> is on the commissioner exempt list with a court date moved up to September 10. MarShawn Lloyd is the lead back. WR Dontayvion Wicks was traded to Philadelphia.","Cleared 9.5 wins only twice in five years despite August rankings like this one. An NFLPA report card showed the largest single-season decline on record."]
+)},
+MIN:{headline:"Kyler Murray starts over J.J. McCarthy", sections:P3(
+  ["Home against Green Bay, Sunday 4:25 PM ET on CBS.","<strong>Kyler Murray</strong> starts, a call Kevin O'Connell made in early August. He signed at the veteran minimum after Arizona released him.","Minnesota finished 2025 by winning its final five games. No major injuries reported."],
+  ["<strong>Brian Flores</strong> signed an extension. His defense allowed 333 points with a DSRS of 4.2, and Green Bay arrives without Parsons or Jacobs.","Murray at the minimum is one of the best value signings of the offseason. Sharp is explicitly higher on Minnesota with him starting.","<strong>Justin Jefferson</strong> remains the best receiver in football and raises the floor of any quarterback situation."],
+  ["Traded edge <strong>Jonathan Greenard</strong> and DT Harrison Phillips. The front will look very different, and rookies are replacing starters.","Scored only 344 points last year, third fewest among winning teams, with an OSRS of minus 3.4.","Both Murray and McCarthy carry durability histories. A competition settled this close to Week 1 is rarely a sign of confidence. Total is 8.5."]
+)},
+
+/* ---------- NFC WEST ---------- */
+LAR:{headline:"Melbourne, and Myles Garrett's Rams debut", sections:P3(
+  ["Against San Francisco at the Melbourne Cricket Ground, Thursday 8:35 PM ET on Netflix. Kickoff is 10:35 AM Friday local time. Rams are the designated home team.","<strong>Matthew Stafford</strong> won AP MVP with 4,707 yards and the offense scored a league-high 518 points. Los Angeles lost the NFC Championship Game and enters as Super Bowl favorite.","<strong>Myles Garrett</strong>, who set the single-season sack record with 23, and CB <strong>Trent McDuffie</strong> both debut."],
+  ["The most complete roster in football on paper. SRS of 12.5 was second in the league, and the defensive line is widely rated the best position group in the NFL.","<strong>Puka Nacua</strong> is expected to play. He remains under league review for an offseason civil suit, but he was not placed on the exempt list and the latest reporting says he may avoid discipline this season.","McVay says Garrett will be ready to go despite missing most of camp with knee swelling and Tuesday's practice."],
+  ["<strong>Aaron Donald</strong> came out of retirement to rejoin the team but will not play or travel for the opener.","Garrett has practiced only twice since early camp. The knee is worth watching in a game on the other side of the world.","Held the fewest draft picks in the league at five, so there is almost no cheap depth. Stafford is 38 and the roster is built to win now."]
+)},
+SF:{headline:"Kittle back, Pearsall out, and a flight to Australia", sections:P3(
+  ["Against the Rams in Melbourne, Thursday 8:35 PM ET on Netflix.","San Francisco won 12 games despite Brock Purdy missing eight and season-ending injuries to Fred Warner and Nick Bosa, then beat Philadelphia in the wild card round.","SRS of 6.0 was fourth best in the NFC even with all the missed time."],
+  ["Getting Purdy, Warner, and Bosa back at once is the biggest health-driven upgrade available to any contender.","<strong>George Kittle</strong> was activated from PUP on August 23 and OC Klay Kubiak said he looks good for Week 1, with managed snaps.","<strong>Mike Evans</strong> and DT <strong>Osa Odighizuwa</strong> fill the two most obvious holes with proven veterans."],
+  ["<strong>Ricky Pearsall</strong> is on season-ending injured reserve. Bosa was listed as questionable working back from the ACL.","Evans, 33, dealt with several minor camp issues that limited his reps. The skill group is aging and injury-prone.","The draft class was widely criticized as a reach, and they face the two best teams in the conference twice each. Total is 9.5."]
+)}
+  }
+};
+
+const WEEKS = [WEEK1];
+
+/* ---------- Next up: the following week's slate, plus a hinge note per team ---------- */
+WEEK1.next = {
+  label:"Week 2", dates:"Thursday, September 17 to Monday, September 21",
+  games:[
+    {away:"DET",home:"BUF",day:"Thu Sep 17",time:"8:15 PM ET",tv:"Prime Video",venue:"Highmark Stadium, Orchard Park"},
+    {away:"CAR",home:"ATL",day:"Sun Sep 20",time:"1:00 PM ET",tv:"FOX",venue:"Mercedes-Benz Stadium, Atlanta"},
+    {away:"NO",home:"BAL",day:"Sun Sep 20",time:"1:00 PM ET",tv:"CBS",venue:"M&T Bank Stadium, Baltimore"},
+    {away:"MIN",home:"CHI",day:"Sun Sep 20",time:"1:00 PM ET",tv:"FOX",venue:"Soldier Field, Chicago"},
+    {away:"CIN",home:"HOU",day:"Sun Sep 20",time:"1:00 PM ET",tv:"CBS",venue:"NRG Stadium, Houston"},
+    {away:"PIT",home:"NE",day:"Sun Sep 20",time:"1:00 PM ET",tv:"CBS",venue:"Gillette Stadium, Foxborough"},
+    {away:"GB",home:"NYJ",day:"Sun Sep 20",time:"1:00 PM ET",tv:"FOX",venue:"MetLife Stadium, East Rutherford"},
+    {away:"CLE",home:"TB",day:"Sun Sep 20",time:"1:00 PM ET",tv:"CBS",venue:"Raymond James Stadium, Tampa"},
+    {away:"PHI",home:"TEN",day:"Sun Sep 20",time:"1:00 PM ET",tv:"FOX",venue:"Nissan Stadium, Nashville"},
+    {away:"JAX",home:"DEN",day:"Sun Sep 20",time:"4:05 PM ET",tv:"CBS",venue:"Empower Field at Mile High, Denver"},
+    {away:"LV",home:"LAC",day:"Sun Sep 20",time:"4:05 PM ET",tv:"CBS",venue:"SoFi Stadium, Inglewood"},
+    {away:"SEA",home:"ARI",day:"Sun Sep 20",time:"4:25 PM ET",tv:"FOX",venue:"State Farm Stadium, Glendale"},
+    {away:"WAS",home:"DAL",day:"Sun Sep 20",time:"4:25 PM ET",tv:"FOX",venue:"AT&T Stadium, Arlington"},
+    {away:"MIA",home:"SF",day:"Sun Sep 20",time:"4:25 PM ET",tv:"FOX",venue:"Levi's Stadium, Santa Clara"},
+    {away:"IND",home:"KC",day:"Sun Sep 20",time:"8:20 PM ET",tv:"NBC / Peacock",venue:"Arrowhead Stadium, Kansas City"},
+    {away:"NYG",home:"LAR",day:"Mon Sep 21",time:"8:15 PM ET",tv:"ESPN",venue:"SoFi Stadium, Inglewood"}
+  ]
+};
+const NEXT_NOTES = {
+  NE:["Four days after Seattle, Rodgers and McCarthy come to Foxborough. The Steelers' new receiver group against Christian Gonzalez is the matchup to watch."],
+  SEA:["First road game as champions and a division game, on a short week after Wednesday. Arizona's defense allowed 488 points last year."],
+  BUF:["Opens the new Highmark Stadium on Thursday night against Detroit. Only four days between a road game in Houston and a home opener, against a Lions offense that scored 481 points."],
+  HOU:["Burrow and the Bengals visit on a short turnaround. Houston's defense against a healthy Cincinnati passing game is the early-season test that tells you how good both units are."],
+  NYJ:["Green Bay comes to MetLife, still without Parsons. If the Jets defense looked real against Tennessee, this is the game that proves it."],
+  TEN:["Philadelphia's defense, possibly the NFC's best, comes to Nashville. A hard test for Ward and a new offensive system in Week 2."],
+  MIA:["A cross-country trip to face a healthy 49ers roster. The second of two road games to open Hafley's tenure."],
+  LV:["A short trip to Inglewood for a division game against the Chargers and their returning All-Pro tackles. Cousins against Herbert."],
+  BAL:["Home opener against New Orleans, which is the softest matchup Baltimore gets in September. Minter's first game at M&T Bank Stadium."],
+  IND:["Sunday night at Arrowhead against a Chiefs team that may have Mahomes back at full speed. A 0-2 start would revive every question from last year's collapse."],
+  PIT:["At New England, which just played the champions. The Rodgers debut in Foxborough against a defense that allowed the sixth fewest points in the league."],
+  ATL:["Home opener against Carolina, the defending division champ. If Tua is still the starter, this is the game that decides whether the offense is functional."],
+  CIN:["At Houston against the AFC's best scoring defense. If Burrow's line held up against Tampa, this is the first real stress test."],
+  TB:["Home opener against Cleveland. The one clearly winnable game in an otherwise tough September stretch."],
+  CLE:["At Tampa Bay. Watson against a Buccaneers defense that just added Rueben Bain, in a game Cleveland has to win if the season is going anywhere."],
+  JAX:["At Denver at altitude, against a defense that allowed 311 points. A tougher test than Cleveland by several degrees."],
+  DEN:["Home opener against Jacksonville. After Monday night in Kansas City, this is the game Denver should win if the 14-3 roster was real."],
+  KC:["Sunday night at home against Indianapolis. A healthy Mahomes against a Colts offense that scored 466 points is the first shootout of the season."],
+  LAC:["Division game against the Raiders at SoFi. Alt and Slater against Maxx Crosby, and Cousins against a Chargers pass rush that added Oweh and Mesidor."],
+  ARI:["Home opener against the Super Bowl champions. Seattle is on a short week, which is the only structural edge Arizona gets."],
+  PHI:["At Tennessee. Philadelphia's rebuilt defense against Cam Ward in his second game under Daboll. The Eagles should be heavy favorites."],
+  DAL:["Home opener against Washington. The rebuilt defense against Jayden Daniels, who has beaten Dallas before. Divisional game with early standings weight."],
+  WAS:["At Dallas after Philadelphia. Two divisional road games to open the season, both against defenses that improved this offseason."],
+  NYG:["Monday night at SoFi against the Super Bowl favorite. Harbaugh's second game is the toughest draw on the schedule."],
+  CHI:["Home opener against Minnesota and Kyler Murray. Chicago against Flores' defense is a rougher matchup than Carolina by a wide margin."],
+  MIN:["At Chicago after Green Bay. Two divisional games to open, both against teams that finished ahead of Minnesota last year."],
+  DET:["Thursday night in Buffalo's new stadium on a short week. Detroit's depleted secondary against Josh Allen and D.J. Moore is a bad matchup at a bad time."],
+  GB:["At the Jets, still without Parsons and Jacobs. A rebuilt Jets front seven against Love, with David Bailey on the edge."],
+  CAR:["At Atlanta. Division game, and Carolina's tackle situation does not improve for another three weeks."],
+  NO:["At Baltimore. Shough against a Ravens defense that added Hendrickson. New Orleans' easy schedule does not really start until later."],
+  LAR:["Monday night at home against the Giants after the long flight back from Melbourne. Garrett's second game, and a get-right spot if the knee held up."],
+  SF:["Home opener against Miami after Australia. A soft landing for a roster managing Kittle, Bosa, and Evans."]
+};
+Object.keys(WEEK1.teams).forEach(ab => { WEEK1.teams[ab].nextNote = NEXT_NOTES[ab] || []; });
+
+
+
+
+/* ============================ helpers ============================ */
+const T = {}; TEAMS.forEach(t => T[t.ab] = t);
+const DIVS = ["AFC East","AFC North","AFC South","AFC West","NFC East","NFC North","NFC South","NFC West"];
+const DIVNOTE = {
+  "AFC East":"New England won it at 14-3. Miami is rebuilding.",
+  "AFC North":"Three of four teams changed head coaches.",
+  "AFC South":"Two 12-win teams and two three-win teams.",
+  "AFC West":"Widely rated the strongest division in football.",
+  "NFC East":"Philadelphia repeat, or a rebuilt Dallas defense.",
+  "NFC North":"Four teams within two games of each other.",
+  "NFC South":"Won with eight wins in each of the last two years.",
+  "NFC West":"The champion, the favorite, and a 12-win team."
+};
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+const sign = n => (n>0?"+":"") + n;
+const esc  = s => String(s).replace(/<[^>]+>/g,"").replace(/"/g,"");
+const li   = a => a.map(x=>`<li>${x}</li>`).join("");
+const txt  = c => { const r=parseInt(c.slice(1,3),16),g=parseInt(c.slice(3,5),16),b=parseInt(c.slice(5,7),16); return (r*299+g*587+b*114)/1000 > 140 ? "#332E29" : "#fff"; };
+const ICON = {
+  n:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h10"/></svg>`,
+  up:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>`,
+  next:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+  down:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9L2.6 17.3A2 2 0 004.3 20h15.4a2 2 0 001.7-2.7L13.7 3.9a2 2 0 00-3.4 0z"/></svg>`
+};
+
+/* ============================ state ============================ */
+let ACTIVE = "guide";
+let conf = "all";
+
+/* ============================ tabs ============================ */
+function buildNav(){
+  const upcoming = [];
+  for (let w = 2; w <= 18; w++) if (!WEEKS.some(x=>x.id==="wk"+w)) upcoming.push(w);
+  document.getElementById("weeknav").innerHTML =
+    `<button class="wtab" role="tab" data-id="guide">Season guide</button>` +
+    WEEKS.map(w=>`<button class="wtab ${w.status==="sample"?"sample":""}" role="tab" data-id="${w.id}">${w.label}</button>`).join("") +
+    upcoming.map(w=>`<button class="wtab" role="tab" disabled title="Not published yet">Wk ${w}</button>`).join("");
+  document.querySelectorAll(".wtab[data-id]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.id)));
+}
+function show(id){
+  ACTIVE = id;
+  document.querySelectorAll(".wtab[data-id]").forEach(b=>b.setAttribute("aria-selected", b.dataset.id===id));
+  document.getElementById("view").innerHTML = (id==="guide") ? renderGuide() : renderWeek(WEEKS.find(w=>w.id===id));
+  if (id==="guide") wireBoard();
+  wireTools();
+  apply();
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
+/* ============================ guide tab ============================ */
+function renderGuide(){
+  return `
+  <section class="pagehead nosearch">
+    <div class="eyebrow"><i></i>Preseason reference</div>
+    <h2>Where every roster stood going into Week 1</h2>
+    <p>Each team gets three sections in the same order: what actually changed since last season, the case for them, and the case against them. This tab does not change during the year, so it stays a fixed point to measure the weeks against.</p>
+  </section>
+
+  <section class="sec nosearch">
+    <div class="sec-head"><h3>The board</h3><p>2025 results against where the market and the analysts had each team. Click a column to sort.</p></div>
+    <div class="tablewrap"><table id="board"><thead><tr>
+      <th data-k="name" data-t="s">Team</th><th data-k="rec" data-t="s">2025</th>
+      <th data-k="pf" data-t="n">PF</th><th data-k="pa" data-t="n">PA</th>
+      <th data-k="pd" data-t="n">Diff</th><th data-k="srs" data-t="n">SRS</th>
+      <th data-k="wt" data-t="n">Win total</th><th data-k="rank" data-t="n">Analyst rank</th>
+    </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  ${DIVS.map(d=>`
+    <section class="div-block" data-conf="${d.slice(0,3)}">
+      <div class="div-head"><h3>${d}</h3><span>${DIVNOTE[d]}</span></div>
+      <div class="pair">
+      ${TEAMS.filter(t=>t.div===d).map(t=>teamCard(t, t.sub, [
+        {t:"What changed", tone:"n", items:t.facts},
+        {t:"The case for them", tone:"up", items:t.up},
+        {t:"The case against them", tone:"down", items:t.down}
+      ], [
+        ["2025", t.rec], ["diff", sign(t.pd)], ["SRS", sign(t.srs.toFixed(1))],
+        ["win total", t.wt], ["analyst rank", t.rank]
+      ])).join("")}
+      </div>
+    </section>`).join("")}
+  <p class="empty" id="empty">No team matches that search.</p>
+  ${FOOTER}`;
+}
+
+/* ============================ week tab ============================ */
+function renderWeek(w){
+  if (!w) return `<p class="empty on">That week is not loaded.</p>`;
+  const recap = w.type === "recap";
+  return `
+  <section class="pagehead nosearch">
+    <div class="eyebrow ${w.status==="sample"?"sample":""}"><i></i>${w.dates}</div>
+    <h2>${w.headline}</h2>
+    <p>${w.intro}</p>
+    ${w.status==="sample" ? `<p class="sampleflag"><strong>Sample data.</strong> Nothing on this tab is real. It exists to show what a played week looks like before one has been played.</p>` : ""}
+  </section>
+
+  <section class="sec nosearch">
+    <div class="sec-head"><h3>${recap ? "Results" : "The slate"}</h3><p>${w.games.length} games. Click one to jump to it.</p></div>
+    <div class="slate">
+      ${w.games.map(g=>{
+        const a=T[g.away], h=T[g.home];
+        const sc = (g.awayScore!=null&&g.homeScore!=null) ? `<span class="score">${g.awayScore}<em style="color:var(--ink-3);font-weight:500;padding:0 3px">-</em>${g.homeScore}</span>` : "";
+        return `<a class="slot" href="#g-${g.away}-${g.home}">
+          <div class="when">${g.day} &middot; ${g.time}</div>
+          <div class="vs"><i style="background:${a.color}"></i>${a.ab}<em>at</em><i style="background:${h.color}"></i>${h.ab}${sc}</div>
+          <div class="note">${g.tv} &middot; ${g.venue}</div></a>`;
+      }).join("")}
+    </div>
+  </section>
+
+  ${w.games.map(g=>{
+    const a=T[g.away], h=T[g.home];
+    const cards = [g.away,g.home].map(ab=>{
+      const entry = w.teams[ab], t = T[ab];
+      if (!entry) return teamCard(t, "No writeup loaded for this team yet.", [], weekMini(t,w,ab), nextPanel(w, ab, [], null));
+      return teamCard(t, entry.headline, entry.sections, weekMini(t,w,ab), nextPanel(w, ab, entry.nextNote, entry.grades));
+    }).join("");
+    const sc = (g.awayScore!=null&&g.homeScore!=null) ? `Final ${g.awayScore}-${g.homeScore} &middot; ` : "";
+    return `<section class="game" id="g-${g.away}-${g.home}">
+      <div class="game-head">
+        <h3><i style="background:${a.color}"></i>${a.name}<em>at</em><i style="background:${h.color}"></i>${h.name}</h3>
+        <div class="meta">${sc}${g.day} &middot; ${g.time} &middot; ${g.tv}</div>
+      </div>
+      ${g.note?`<p class="game-note">${g.note}</p>`:""}
+      <div class="pair">${cards}</div>
+    </section>`;
+  }).join("")}
+
+  <p class="empty" id="empty">No team matches that search.</p>
+  ${TOOLS(w)}
+  ${FOOTER}`;
+}
+function weekMini(t,w,ab){
+  const g = w.games.find(x=>x.away===ab||x.home===ab);
+  const out = [["2025", t.rec], ["win total", t.wt], ["rank", t.rank]];
+  if (g){
+    const home = g.home===ab;
+    out.push([home?"vs":"at", home?g.away:g.home]);
+    if (g.awayScore!=null){
+      const mine = home?g.homeScore:g.awayScore, theirs = home?g.awayScore:g.homeScore;
+      const res = mine>theirs?"W":mine<theirs?"L":"T";
+      out.push(["result", res+" "+mine+"-"+theirs, res==="W"?"win":res==="L"?"loss":""]);
+    } else out.push(["kickoff", g.time.replace(" ET","")]);
+  }
+  return out;
+}
+
+/* ============================ ranks ============================ */
+const BASE = (()=>{
+  const rankBy = (arr, key, desc) => {
+    const s = [...arr].sort((a,b)=> desc ? b[key]-a[key] : a[key]-b[key]);
+    const m = {}; s.forEach((t,i)=> m[t.ab] = i+1); return m;
+  };
+  const off = rankBy(TEAMS,"pf",true);      // most points scored in 2025
+  const def = rankBy(TEAMS,"pa",false);     // fewest points allowed in 2025
+  const srs = rankBy(TEAMS,"srs",true);     // 2025 overall finish
+  const m = {}; TEAMS.forEach(t => m[t.ab] = {off:off[t.ab], def:def[t.ab], srs:srs[t.ab]});
+  return m;
+})();
+function defaultGrades(ab){
+  const b = BASE[ab], t = T[ab];
+  return { overall:{rank:t.rank, prev:b.srs}, offense:{rank:b.off}, defense:{rank:b.def} };
+}
+const ORD = n => { const s=["th","st","nd","rd"], v=n%100; return n + "<sup>" + (s[(v-20)%10]||s[v]||s[0]) + "</sup>"; };
+function deltaChip(g){
+  if (!g || g.rank==null || g.prev==null) return '<span class="delta none">0</span>';
+  const d = g.prev - g.rank;
+  if (d === 0) return '<span class="delta flat">even</span>';
+  return '<span class="delta ' + (d>0?"up":"down") + '">' + (d>0?"\u25B2":"\u25BC") + " " + Math.abs(d) + '</span>';
+}
+function gradeBlock(w, ab, grades){
+  const g = grades || defaultGrades(ab);
+  const cap = w.type === "outlook"
+    ? "Preseason rank, change since 2025 finish"
+    : "Rank after " + w.label + ", change from last week";
+  const cell = (lab, o) => `<div class="grade"><span class="lab">${lab}</span>
+    <span class="val">${o && o.rank!=null ? ORD(o.rank) : "&ndash;"}</span>${deltaChip(o)}</div>`;
+  return `<div class="gradecap">${cap}</div><div class="grades">
+    ${cell("Overall", g.overall)}${cell("Offense", g.offense)}${cell("Defense", g.defense)}
+  </div>`;
+}
+
+/* ============================ next up panel ============================ */
+function nextPanel(w, ab, note, grades){
+  if (!w.next || !w.next.games) return "";
+  const g = w.next.games.find(x=>x.away===ab||x.home===ab);
+  const head = `<h5>${ICON.next}Next up<span class="wk">${w.next.label||""}</span></h5>`;
+  if (!g) return `<div class="panel next">${head}${gradeBlock(w, ab, grades)}<div class="pending">Bye week.</div></div>`;
+  const home = g.home===ab, opp = T[home?g.away:g.home];
+  return `<div class="panel next">${head}
+    ${gradeBlock(w, ab, grades)}
+    <div class="nextrow">
+      <div class="badge" style="background:${opp.color};color:${txt(opp.color)}">${opp.ab}</div>
+      <div><div class="who"><em>${home?"vs":"at"}</em> ${opp.name}</div><div class="whn">${g.day} &middot; ${g.time} &middot; ${g.tv}</div></div>
+    </div>
+    <div class="nextvenue">${g.venue}</div>
+    ${(note&&note.length) ? note.map(n=>`<p>${n}</p>`).join("") : `<div class="pending">No note yet.</div>`}
+  </div>`;
+}
+
+/* ============================ shared card ============================ */
+function teamCard(t, sub, sections, mini, extra){
+  const search = esc([t.name,t.ab,t.div,sub,sections.map(s=>s.t+" "+s.items.join(" ")).join(" "), extra||""].join(" "));
+  return `<article class="card" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}">
+    <div class="card-top">
+      <div class="row">
+        <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
+        <div><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+      </div>
+      <div class="mini">${mini.map(m=>`<span class="pill ${m[2]||""}"><b>${m[1]}</b>${m[0]}</span>`).join("")}</div>
+    </div>
+    <div class="panels">${sections.map(s=>`
+      <div class="panel ${s.tone==="up"?"up":s.tone==="down"?"down":""}">
+        <h5>${ICON[s.tone==="up"?"up":s.tone==="down"?"down":"n"]}${s.t}</h5>
+        ${s.items.length ? `<ul>${li(s.items)}</ul>` : `<div class="pending">Nothing loaded for this section yet.</div>`}
+      </div>`).join("")}${extra||""}</div>
+  </article>`;
+}
+
+/* ============================ board sorting ============================ */
+let boardRows=[], sortKey="rank", sortDir=1;
+function paintBoard(rows){
+  const tb = document.querySelector("#board tbody"); if(!tb) return;
+  tb.innerHTML = rows.map(t=>`<tr><td><a href="#${slug(t.name)}-guide"><i class="dot" style="background:${t.color}"></i>${t.name}</a></td>
+    <td>${t.rec}</td><td>${t.pf}</td><td>${t.pa}</td>
+    <td class="${t.pd>0?'pos':'neg'}">${sign(t.pd)}</td>
+    <td class="${t.srs>0?'pos':'neg'}">${sign(t.srs.toFixed(1))}</td>
+    <td>${t.wt}</td><td>${t.rank}</td></tr>`).join("");
+}
+function wireBoard(){
+  boardRows = [...TEAMS].sort((a,b)=>a.rank-b.rank); sortKey="rank"; sortDir=1;
+  paintBoard(boardRows);
+  document.querySelectorAll("#board th").forEach(th=>{
+    th.addEventListener("click",()=>{
+      const k=th.dataset.k, num=th.dataset.t==="n";
+      sortDir = (k===sortKey) ? -sortDir : (num?-1:1); sortKey=k;
+      boardRows.sort((a,b)=> num ? (a[k]-b[k])*sortDir : String(a[k]).localeCompare(String(b[k]))*sortDir);
+      document.querySelectorAll("#board th").forEach(x=>x.removeAttribute("aria-sort"));
+      th.setAttribute("aria-sort", sortDir===1?"ascending":"descending");
+      paintBoard(boardRows);
+    });
+  });
+  const rt = document.querySelector('#board th[data-k="rank"]'); if(rt) rt.setAttribute("aria-sort","ascending");
+}
+
+/* ============================ filtering ============================ */
+function apply(){
+  clearMarks();
+  const q = document.getElementById("q");
+  const term = (q.value||"").trim().toLowerCase();
+  document.body.classList.toggle("searching", !!term);
+  document.getElementById("qx").classList.toggle("on", !!term);
+  let shown = 0;
+  document.querySelectorAll(".card").forEach(c=>{
+    const on = (conf==="all"||c.dataset.conf===conf) && (!term || c.dataset.search.toLowerCase().includes(term));
+    c.classList.toggle("hide", !on); if(on) shown++;
+  });
+  document.querySelectorAll(".div-block, .game").forEach(s=>{
+    s.style.display = s.querySelectorAll(".card:not(.hide)").length ? "" : "none";
+  });
+  const r = document.getElementById("results");
+  if (term){
+    const label = ACTIVE==="guide" ? "the season guide" : (WEEKS.find(w=>w.id===ACTIVE)||{}).label;
+    r.innerHTML = `<span><b>${shown}</b> ${shown===1?"team":"teams"} in ${label}${conf!=="all"?" ("+conf+" only)":""}</span>
+      <span class="nav">
+        <span class="pos" id="rpos"></span>
+        <button type="button" id="rprev" title="Previous match (Shift+Enter)">&uarr;</button>
+        <button type="button" id="rnext" title="Next match (Enter)">&darr;</button>
+        <button type="button" id="rclear">Clear</button>
+      </span>`;
+    r.classList.add("on");
+    document.getElementById("rclear").addEventListener("click", clearSearch);
+    document.getElementById("rprev").addEventListener("click", ()=>step(-1));
+    document.getElementById("rnext").addEventListener("click", ()=>step(1));
+    HITS = term.length >= 2 ? markAll(term) : [];
+    CUR = -1;
+    if (HITS.length) step(1, true);
+    paintPos();
+  } else { r.classList.remove("on"); r.innerHTML=""; }
+  const eEl=document.getElementById("empty"); if(eEl) eEl.classList.toggle("on", shown===0);
+}
+let HITS = [], CUR = -1;
+function clearMarks(){
+  const root = document.getElementById("view"); if(!root) return;
+  root.querySelectorAll("mark.hit").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+  root.querySelectorAll(".panel, .card-top, .nextrow, .nextvenue").forEach(n => n.normalize());
+  root.querySelectorAll(".card.hasCur").forEach(c => c.classList.remove("hasCur"));
+  HITS = []; CUR = -1;
+}
+function markAll(term){
+  const out = [];
+  document.querySelectorAll(".card:not(.hide)").forEach(card=>{
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, {
+      acceptNode(n){
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if (n.parentElement && n.parentElement.closest("mark")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = []; let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(node=>{
+      const txt = node.nodeValue, low = txt.toLowerCase();
+      let i = low.indexOf(term);
+      if (i < 0) return;
+      const frag = document.createDocumentFragment();
+      let last = 0;
+      while (i >= 0){
+        if (i > last) frag.appendChild(document.createTextNode(txt.slice(last, i)));
+        const m = document.createElement("mark");
+        m.className = "hit";
+        m.textContent = txt.slice(i, i + term.length);
+        frag.appendChild(m); out.push(m);
+        last = i + term.length;
+        i = low.indexOf(term, last);
+      }
+      if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  });
+  return out;
+}
+function paintPos(){
+  const el = document.getElementById("rpos"); if(!el) return;
+  el.textContent = HITS.length ? (CUR+1) + " of " + HITS.length : "no matches";
+  const p = document.getElementById("rprev"), nx = document.getElementById("rnext");
+  if (p) p.disabled = HITS.length < 2;
+  if (nx) nx.disabled = HITS.length < 2;
+}
+function step(dir, first){
+  if (!HITS.length) return;
+  if (HITS[CUR]){
+    HITS[CUR].classList.remove("cur");
+    const c = HITS[CUR].closest(".card"); if (c) c.classList.remove("hasCur");
+  }
+  CUR = first ? 0 : (CUR + dir + HITS.length) % HITS.length;
+  const m = HITS[CUR];
+  m.classList.add("cur");
+  const card = m.closest(".card"); if (card) card.classList.add("hasCur");
+  m.scrollIntoView({block:"center", behavior: first ? "auto" : "smooth"});
+  paintPos();
+}
+function clearSearch(){
+  const q=document.getElementById("q"); q.value=""; apply(); q.focus();
+}
+
+/* ============================ data tools ============================ */
+const SECTION_KEYS = ["Last game","Positives","Negatives"];
+
+function TOOLS(w){
+  return `<details class="tools" id="tools">
+    <summary>Data tools</summary>
+    <div class="tools-body">
+      <p>Three things live here. Pull the stat request to hand to Claude, load a finished week back in, or export what you already have.</p>
+      <div class="btnrow">
+        <button class="btn" id="btn-req">Copy stat request for the next week</button>
+        <button class="btn ghost" id="btn-tmpl">Download blank week template</button>
+        <button class="btn ghost" id="btn-exp">Export weeks.json for the site</button>
+      </div>
+      <textarea id="io" spellcheck="false" placeholder="Paste a finished week's JSON here, then press Load week."></textarea>
+      <div class="btnrow">
+        <button class="btn" id="btn-load">Load week from JSON</button>
+        <button class="btn ghost" id="btn-clear">Clear box</button>
+      </div>
+      <div class="status" id="status"></div>
+      <p class="hint">A loaded week lives in this browser tab only. To keep it for good, send the JSON back to Claude and get a rebuilt file with the week baked in.</p>
+    </div>
+  </details>`;
+}
+
+function nextWeekNum(){
+  return Math.max(0, ...WEEKS.filter(w=>w.status!=="sample").map(w=>parseInt((w.id.match(/\d+/)||[0])[0],10)||0)) + 1;
+}
+function statRequest(w){
+  const nextNum = nextWeekNum();
+  return `Build the Week ${nextNum} recap for my 2026 NFL tracker.
+
+Pull from reputable sources (Pro Football Reference box scores, ESPN, NFL.com, team sites, Sharp Football, PFF where public) and give me back ONE JSON object matching the schema below. No prose outside the JSON.
+
+For every one of the 32 teams I want three sections, nothing more:
+  Last game   - what happened: final score, record, how the game flowed, and 3 or 4 hard numbers
+                (total yards, yards per play, third down, red zone, turnovers, time of possession)
+  Positives   - what came out of the game FOR them. Build this from what reputable sports sources are saying
+                read against the box score. Name the player or unit and give the number that backs it.
+  Negatives   - what came out of the game AGAINST them. Same standard. Include injuries that happened in the
+                game or new designations, and anything sources flagged as a concern going forward.
+  nextNote    - one or two sentences on the following week's matchup and what it hinges on for this team.
+                The schedule itself goes in the top-level "next" block, so do not repeat opponent, time, or venue here.
+  grades      - three ranks out of 32 and where each stood the week before, so the card can show movement:
+                  overall  - your read of the team right now, blending record, point differential, and how they
+                             have actually played. Rank all 32 against each other, no ties.
+                  offense  - rank by season-to-date offensive performance (points and yards per drive, EPA per
+                             play if you have it). Cumulative for the season, not just this one game.
+                  defense  - same on the other side of the ball. 1 is the best defense, 32 the worst.
+                "prev" is that team's rank in the previous week's file. For the first recap, prev is the
+                preseason number the tracker already shows on the Week 1 tab.
+
+Rules I want followed:
+  - No em dashes and no double dashes anywhere in the text.
+  - Bullets, not paragraphs. Three to five per section.
+  - Every claim that is a number should carry the number.
+  - Lead with what the sources agree on. If they disagree, say so in one bullet.
+  - Bold key names with <strong> tags.
+
+Schema:
+{
+  "id": "wk${nextNum}",
+  "label": "Week ${nextNum}",
+  "type": "recap",
+  "status": "live",
+  "dates": "Month D to Month D, 2026",
+  "headline": "one short line",
+  "intro": "two or three sentences on the week as a whole",
+  "games": [
+    { "away":"NE", "home":"SEA", "day":"Sun Sep 20", "time":"Final", "tv":"CBS",
+      "venue":"Stadium, City", "note":"one line", "awayScore":17, "homeScore":24 }
+  ],
+  "next": {
+    "label": "Week ${nextNum+1}",
+    "dates": "Month D to Month D, 2026",
+    "games": [ { "away":"SEA", "home":"ARI", "day":"Sun Sep 27", "time":"4:25 PM ET", "tv":"FOX", "venue":"Stadium, City" } ]
+  },
+  "teams": {
+    "SEA": {
+      "headline": "one short line for the card header",
+      "nextNote": ["one or two sentences"],
+      "grades": {
+        "overall": { "rank": 3, "prev": 3 },
+        "offense": { "rank": 6, "prev": 2 },
+        "defense": { "rank": 1, "prev": 1 }
+      },
+      "sections": [
+        { "t":"Last game", "tone":"n",    "items":["...","..."] },
+        { "t":"Positives", "tone":"up",   "items":["...","..."] },
+        { "t":"Negatives", "tone":"down", "items":["...","..."] }
+      ]
+    }
+  }
+}
+
+Team keys, all 32: ${TEAMS.map(t=>t.ab).join(", ")}`;
+}
+
+function blankTemplate(){
+  const nextNum = nextWeekNum();
+  return {
+    id:"wk"+nextNum, label:"Week "+nextNum, type:"recap", status:"live",
+    dates:"", headline:"", intro:"", games:[],
+    next:{label:"Week "+(nextNum+1), dates:"", games:[]},
+    teams: Object.fromEntries(TEAMS.map(t=>[t.ab,{
+      headline:"", nextNote:[],
+      grades:{overall:{rank:null,prev:null}, offense:{rank:null,prev:null}, defense:{rank:null,prev:null}},
+      sections: SECTION_KEYS.map(k=>({t:k, tone: k==="Positives"?"up":k==="Negatives"?"down":"n", items:[]}))
+    }]))
+  };
+}
+
+function download(name, text){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 400);
+}
+function say(msg, bad){
+  const s = document.getElementById("status"); if(!s) return;
+  s.textContent = msg; s.classList.toggle("err", !!bad);
+}
+function toClipboard(text){
+  const box = document.getElementById("io");
+  box.value = text; box.focus(); box.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch(e){}
+  const done = () => say("Copied. Paste it into Claude.");
+  const fail = () => say(ok ? "Copied. Paste it into Claude." : "Could not reach the clipboard. The text is selected in the box, copy it manually.", !ok);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fail);
+  else fail();
+}
+function wireTools(){
+  const t = document.getElementById("tools"); if(!t) return;
+  const w = WEEKS.find(x=>x.id===ACTIVE);
+  document.getElementById("btn-req").addEventListener("click", ()=>toClipboard(statRequest(w)));
+  document.getElementById("btn-tmpl").addEventListener("click", ()=>{
+    download("nfl-2026-week-template.json", JSON.stringify(blankTemplate(), null, 2)); say("Template downloaded.");
+  });
+  document.getElementById("btn-exp").addEventListener("click", ()=>{
+    download("weeks.json", JSON.stringify(WEEKS.filter(x=>x.id!=="wk1"), null, 2));
+    say("weeks.json downloaded. Upload it next to index.html to publish these weeks.");
+  });
+  document.getElementById("btn-clear").addEventListener("click", ()=>{ document.getElementById("io").value=""; say(""); });
+  document.getElementById("btn-load").addEventListener("click", ()=>{
+    const raw = document.getElementById("io").value.trim();
+    if (!raw) return say("Nothing in the box.", true);
+    let data;
+    try { data = JSON.parse(raw); } catch(e){ return say("That is not valid JSON. " + e.message, true); }
+    const list = Array.isArray(data) ? data : [data];
+    const bad = list.find(d => !d || !d.id || !d.label || !d.teams);
+    if (bad) return say("A week is missing id, label, or teams.", true);
+    let added = 0;
+    list.forEach(d=>{
+      d.games = d.games || []; d.status = d.status || "live"; d.type = d.type || "recap";
+      d.dates = d.dates || ""; d.headline = d.headline || ""; d.intro = d.intro || "";
+      const i = WEEKS.findIndex(x=>x.id===d.id);
+      if (i >= 0) WEEKS[i] = d; else { WEEKS.push(d); added++; }
+    });
+    WEEKS.sort((a,b)=>{
+      const n = x => x.status==="sample" ? 999 : (parseInt((x.id.match(/\d+/)||[0])[0],10)||0);
+      return n(a)-n(b);
+    });
+    buildNav();
+    show(list[0].id);
+    say((added?added+" week added. ":"Week replaced. ") + "Now showing it.");
+    document.getElementById("tools").open = true;
+  });
+}
+
+/* ============================ footer ============================ */
+const FOOTER = `<footer>
+  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 9, 2026. New week posted each Tuesday.</p>
+  <h4>Where this comes from</h4>
+  <p>2025 records, points for and against, and SRS are from Pro Football Reference. Posted win totals are the DraftKings and BetMGM numbers as re-checked in late August. Analyst rank is the Sharp Football Analysis pre Week 1 order, used as a single consistent expert baseline. Schedule, kickoff times, injury designations, and roster notes come from NFL.com, ESPN, NBC Sports, CBS Sports, Fox Sports, and team sites.</p>
+  <p>Anything described as a positive or a concern is a reading of the consensus case, not a settled fact. Injury notes move constantly and reflect reporting as of the date on each week tab.</p>
+</footer>`;
+
+/* ============================ boot ============================ */
+document.getElementById("q").addEventListener("input", apply);
+document.getElementById("qx").addEventListener("click", clearSearch);
+document.getElementById("q").addEventListener("keydown", e=>{
+  if (e.key === "Escape") { clearSearch(); return; }
+  if (e.key === "Enter") { e.preventDefault(); step(e.shiftKey ? -1 : 1); }
+});
+document.querySelectorAll(".chip").forEach(b=>{
+  b.addEventListener("click",()=>{
+    conf = b.dataset.conf;
+    document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    apply();
+  });
+});
+document.getElementById("top").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+function latestWeekId(){
+  const nums = WEEKS.map(w => parseInt((w.id.match(/\d+/)||[0])[0],10)||0);
+  return WEEKS[nums.indexOf(Math.max(...nums))].id;
+}
+function mergeWeeks(list){
+  let added = 0;
+  list.forEach(d=>{
+    if (!d || !d.id || !d.teams) return;
+    d.games = d.games || []; d.status = d.status || "live"; d.type = d.type || "recap";
+    d.label = d.label || ("Week " + ((d.id.match(/\d+/)||["?"])[0]));
+    d.dates = d.dates || ""; d.headline = d.headline || ""; d.intro = d.intro || "";
+    const i = WEEKS.findIndex(x=>x.id===d.id);
+    if (i >= 0) WEEKS[i] = d; else { WEEKS.push(d); added++; }
+  });
+  WEEKS.sort((a,b)=>((parseInt((a.id.match(/\d+/)||[0])[0],10)||0)-(parseInt((b.id.match(/\d+/)||[0])[0],10)||0)));
+  return added;
+}
+buildNav();
+show("wk1");
+
+/* When published, any weeks.json sitting next to this file is loaded and merged.
+   Opening the file locally just skips this and uses the weeks baked in above. */
+(function loadHosted(){
+  if (!window.fetch || !/^https?:$/.test(location.protocol)) return;
+  fetch("weeks.json", {cache:"no-store"})
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data) return;
+      const list = Array.isArray(data) ? data : [data];
+      if (!mergeWeeks(list)) return;
+      buildNav();
+      show(latestWeekId());
+    })
+    .catch(()=>{});
+})();
+</script>
+</body>
+</html>
