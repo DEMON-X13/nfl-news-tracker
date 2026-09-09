@@ -41,7 +41,18 @@ a{color:inherit}
 .bar-in{max-width:var(--maxw);margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
 .brand{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:17px;letter-spacing:-.01em;white-space:nowrap;display:flex;align-items:center;gap:9px}
 .brand i{width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#1C7F58,#C4472F);display:inline-block}
-.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 320px;min-width:0;padding:3px;background:var(--surface-2);border-radius:999px;scrollbar-width:none}
+.tabswrap{position:relative;flex:1 1 320px;min-width:0;display:flex;align-items:center}
+.tabs{display:flex;gap:4px;overflow-x:auto;width:100%;min-width:0;padding:3px;background:var(--surface-2);border-radius:999px;scrollbar-width:none;scroll-behavior:smooth}
+.tabswrap::before,.tabswrap::after{content:"";position:absolute;top:0;bottom:0;width:44px;pointer-events:none;z-index:2;opacity:0;transition:opacity .15s ease}
+.tabswrap::before{left:0;border-radius:999px 0 0 999px;background:linear-gradient(90deg,#EDEAE2 35%,rgba(237,234,226,0))}
+.tabswrap::after{right:0;border-radius:0 999px 999px 0;background:linear-gradient(270deg,#EDEAE2 35%,rgba(237,234,226,0))}
+.tabswrap.more-l::before,.tabswrap.more-r::after{opacity:1}
+.tscroll{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--line-2);
+  background:var(--surface);color:var(--ink-2);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0;box-shadow:0 1px 3px rgba(51,46,41,.14)}
+.tscroll:hover{color:var(--ink);border-color:var(--ink-2)}
+.tscroll:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#tleft{left:3px}#tright{right:3px}
+.tabswrap.more-l #tleft,.tabswrap.more-r #tright{display:flex}
 .tabs::-webkit-scrollbar{display:none}
 .wtab{flex:0 0 auto;border:0;background:transparent;color:var(--ink-2);font-weight:600;font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,box-shadow .15s}
 .wtab:hover{color:var(--ink)}
@@ -231,7 +242,11 @@ main{padding-bottom:90px}
 <div class="bar">
   <div class="bar-in">
     <div class="brand"><i></i>2026 NFL Tracker</div>
-    <div class="tabs" id="weeknav" role="tablist" aria-label="Week"></div>
+    <div class="tabswrap" id="tabswrap">
+      <button class="tscroll" id="tleft" aria-label="Scroll weeks left">&#8249;</button>
+      <div class="tabs" id="weeknav" role="tablist" aria-label="Week"></div>
+      <button class="tscroll" id="tright" aria-label="Scroll weeks right">&#8250;</button>
+    </div>
     <div class="tools-right">
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -1345,10 +1360,24 @@ function buildNav(){
     WEEKS.map(w=>`<button class="wtab ${w.status==="sample"?"sample":""}" role="tab" data-id="${w.id}">${w.label}</button>`).join("") +
     upcoming.map(w=>`<button class="wtab" role="tab" disabled title="Not published yet">Wk ${w}</button>`).join("");
   document.querySelectorAll(".wtab[data-id]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.id)));
+  tabEdges();
+}
+function tabEdges(){
+  const s = document.getElementById("weeknav"), wrap = document.getElementById("tabswrap");
+  if (!s || !wrap) return;
+  const max = s.scrollWidth - s.clientWidth;
+  wrap.classList.toggle("more-l", s.scrollLeft > 4);
+  wrap.classList.toggle("more-r", s.scrollLeft < max - 4);
+}
+function revealTab(id){
+  const b = document.querySelector('.wtab[data-id="' + id + '"]');
+  if (b && b.scrollIntoView) b.scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
+  setTimeout(tabEdges, 350);
 }
 function show(id){
   ACTIVE = id;
   document.querySelectorAll(".wtab[data-id]").forEach(b=>b.setAttribute("aria-selected", b.dataset.id===id));
+  revealTab(id);
   document.getElementById("view").innerHTML = (id==="guide") ? renderGuide() : renderWeek(WEEKS.find(w=>w.id===id));
   if (id==="guide") wireBoard();
   wireTools();
@@ -1846,6 +1875,22 @@ document.querySelectorAll(".chip").forEach(b=>{
     apply();
   });
 });
+(function wireTabScroll(){
+  const s = document.getElementById("weeknav");
+  s.addEventListener("scroll", tabEdges, {passive:true});
+  window.addEventListener("resize", tabEdges);
+  document.getElementById("tleft").addEventListener("click", ()=>{ s.scrollBy({left:-220, behavior:"smooth"}); setTimeout(tabEdges,350); });
+  document.getElementById("tright").addEventListener("click", ()=>{ s.scrollBy({left:220, behavior:"smooth"}); setTimeout(tabEdges,350); });
+  s.addEventListener("wheel", e=>{
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    const max = s.scrollWidth - s.clientWidth;
+    if ((e.deltaY < 0 && s.scrollLeft <= 0) || (e.deltaY > 0 && s.scrollLeft >= max)) return;
+    e.preventDefault();
+    s.scrollLeft += e.deltaY;
+    tabEdges();
+  }, {passive:false});
+  setTimeout(tabEdges, 100);
+})();
 document.getElementById("top").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 function latestWeekId(){
   const nums = WEEKS.map(w => parseInt((w.id.match(/\d+/)||[0])[0],10)||0);
