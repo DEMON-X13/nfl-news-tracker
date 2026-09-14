@@ -131,25 +131,16 @@ function renderWeek(w){
 
   ${w.games.map(g=>{
     const a=T[g.away], h=T[g.home];
-    const cards = [g.away,g.home].map(ab=>{
-      const entry = w.teams[ab] || {}, t = T[ab];
-      const secs = [];
-      secs.push({t:"Matchup preview", tone:"n", items:entry.matchup||[]});
-      secs.push({t:"Strengths", tone:"up", items:entry.strengths||[]});
-      secs.push({t:"Weaknesses", tone:"down", items:entry.weaknesses||[]});
-      return teamCard(t, entry.headline || "No writeup loaded yet.", secs, weekMini(t,w,ab), rankPanel(g, ab, w));
-    }).join("");
     const sc = (g.awayScore!=null&&g.homeScore!=null) ? `Final ${g.awayScore}-${g.homeScore} &middot; ` : "";
     const k = kickOf(g);
     return `<section class="game" id="g-${g.away}-${g.home}">
       <div class="game-head">
         <h3><i style="background:${a.color}"></i>${a.name}<em>at</em><i style="background:${h.color}"></i>${h.name}</h3>
-        <div class="meta">${sc}${k.day} &middot; ${k.time} &middot; ${g.tv}</div>
+        <div class="meta">${sc}${k.day}${sc?"":" &middot; "+k.time} &middot; ${g.tv}</div>
       </div>
       ${g.note?`<p class="game-note">${g.note}</p>`:""}
       <button class="fsbtn" data-game="${g.away}-${g.home}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Full Stats Preview</button>
-      <div class="pair">${cards}</div>
-
+      <article class="card duo">${teamSide(g, g.away, w)}${teamSide(g, g.home, w)}</article>
     </section>`;
   }).join("")}
 
@@ -157,19 +148,24 @@ function renderWeek(w){
   ${TOOLS(w)}
   ${FOOTER}`;
 }
-function weekMini(t,w,ab){
-  const g = w.games.find(x=>x.away===ab||x.home===ab);
-  const out = [["2025", t.rec], ["win total", t.wt], ["rank", t.rank]];
-  if (g){
-    const home = g.home===ab;
-    out.push([home?"home game":"away game", home?g.away:g.home]);
-    if (g.awayScore!=null){
-      const mine = home?g.homeScore:g.awayScore, theirs = home?g.awayScore:g.homeScore;
-      const res = mine>theirs?"W":mine<theirs?"L":"T";
-      out.push(["result", res+" "+mine+"-"+theirs, res==="W"?"win":res==="L"?"loss":""]);
-    } else out.push(["kickoff", kickOf(g).time]);
-  }
-  return out;
+/* One team's half of the combined game card. Click it to open the full breakdown. */
+function teamSide(g, ab, w){
+  const t = T[ab], entry = (w.teams||{})[ab] || {};
+  const sub = entry.headline || "No writeup loaded yet.";
+  const detail = [entry.matchup||[], entry.strengths||[], entry.weaknesses||[], g.keys||[]].map(a=>a.join(" ")).join(" ");
+  const search = esc([t.name, t.ab, t.div, sub, detail].join(" "));
+  return `<div class="tm" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}"
+      data-team="${ab}" data-game="${g.away}-${g.home}" role="button" tabindex="0" aria-label="Open the ${t.name} breakdown">
+    <div class="card-top">
+      <div class="row">
+        <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
+        <div><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+      </div>
+      <div class="mini"><span class="pill"><b>${t.rec}</b>2025</span><span class="pill"><b>${t.rank}</b>rank</span></div>
+    </div>
+    ${rankPanel(g, ab, w)}
+    <div class="tm-more">Full breakdown<span aria-hidden="true">&rsaquo;</span></div>
+  </div>`;
 }
 
 /* ============================ ranks ============================ */
@@ -319,7 +315,7 @@ function rankPanel(g, ab, w){
     return `<div class="nm">${lab}</div><div class="rvcell">${val}</div>
       <div class="v ${cls}">${ORD(a.rank)}</div>`;
   };
-  return `<div class="stack"><div class="panel rank">
+  return `<div class="panel rank">
     <h5>${ICON.rank}Team rankings</h5>
     <div class="rk">
       <div class="hd l"></div><div class="hd"></div><div class="hd">rank of 32</div>
@@ -329,23 +325,6 @@ function rankPanel(g, ab, w){
       ${row("Points per game", me.ppg, them.ppg)}
       ${row("Turnover margin", me.turnover, them.turnover)}
     </div>
-  </div>
-  ${nextPanel(ab, w)}</div>`;
-}
-function nextPanel(ab, w){
-  const nx = w.next;
-  if (!nx || !nx.games) return "";
-  const g = nx.games.find(x=>x.away===ab||x.home===ab);
-  const head = `<h5>${ICON.next}Next game<span style="margin-left:auto;font-weight:600;color:var(--ink-3);letter-spacing:.06em">${nx.label||""}</span></h5>`;
-  if (!g) return `<div class="panel nx">${head}<div class="pending">Bye week.</div></div>`;
-  const home = g.home===ab, opp = T[home?g.away:g.home], k = kickOf(g);
-  return `<div class="panel nx">${head}
-    <div class="nxrow">
-      <div class="badge" style="background:${opp.color};color:${txt(opp.color)}">${opp.ab}</div>
-      <div><div class="who">${opp.name}</div><div class="whn">${k.day} &middot; ${k.time} &middot; ${g.tv}</div></div>
-      <span class="ha ${home?"h":"a"}">${home?"Home":"Away"}</span>
-    </div>
-    <div class="nxvenue">${g.venue}</div>
   </div>`;
 }
 
@@ -402,14 +381,15 @@ function apply(){
   document.body.classList.toggle("searching", !!term);
   document.getElementById("qx").classList.toggle("on", !!term);
   let shown = 0;
-  document.querySelectorAll(".card").forEach(c=>{
+  document.querySelectorAll(".card:not(.duo), .tm").forEach(c=>{
     const on = (conf==="all"||c.dataset.conf===conf) && (!term || c.dataset.search.toLowerCase().includes(term));
     c.classList.toggle("hide", !on); if(on) shown++;
   });
   document.querySelectorAll(".div-block, .game").forEach(s=>{
-    s.style.display = s.querySelectorAll(".card:not(.hide)").length ? "" : "none";
+    s.style.display = s.querySelectorAll(".card:not(.duo):not(.hide), .tm:not(.hide)").length ? "" : "none";
   });
   const r = document.getElementById("results");
+  SHOWN = shown;
   if (term){
     const label = ACTIVE==="guide" ? "the season guide" : (WEEKS.find(w=>w.id===ACTIVE)||{}).label;
     r.innerHTML = `<span><b>${shown}</b> ${shown===1?"team":"teams"} in ${label}${conf!=="all"?" ("+conf+" only)":""}</span>
@@ -430,17 +410,17 @@ function apply(){
   } else { r.classList.remove("on"); r.innerHTML=""; }
   const eEl=document.getElementById("empty"); if(eEl) eEl.classList.toggle("on", shown===0);
 }
-let HITS = [], CUR = -1;
+let HITS = [], CUR = -1, SHOWN = 0;
 function clearMarks(){
   const root = document.getElementById("view"); if(!root) return;
   root.querySelectorAll("mark.hit").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
   root.querySelectorAll(".panel, .card-top, .nextrow, .nextvenue").forEach(n => n.normalize());
-  root.querySelectorAll(".card.hasCur").forEach(c => c.classList.remove("hasCur"));
+  root.querySelectorAll(".hasCur").forEach(c => c.classList.remove("hasCur"));
   HITS = []; CUR = -1;
 }
 function markAll(term){
   const out = [];
-  document.querySelectorAll(".card:not(.hide)").forEach(card=>{
+  document.querySelectorAll(".card:not(.duo):not(.hide), .tm:not(.hide)").forEach(card=>{
     const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, {
       acceptNode(n){
         if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
@@ -473,7 +453,7 @@ function markAll(term){
 }
 function paintPos(){
   const el = document.getElementById("rpos"); if(!el) return;
-  el.textContent = HITS.length ? (CUR+1) + " of " + HITS.length : "no matches";
+  el.textContent = HITS.length ? (CUR+1) + " of " + HITS.length : (SHOWN ? "matches in team details" : "no matches");
   const p = document.getElementById("rprev"), nx = document.getElementById("rnext");
   if (p) p.disabled = HITS.length < 2;
   if (nx) nx.disabled = HITS.length < 2;
@@ -482,12 +462,12 @@ function step(dir, first){
   if (!HITS.length) return;
   if (HITS[CUR]){
     HITS[CUR].classList.remove("cur");
-    const c = HITS[CUR].closest(".card"); if (c) c.classList.remove("hasCur");
+    const c = HITS[CUR].closest(".tm, .card"); if (c) c.classList.remove("hasCur");
   }
   CUR = first ? 0 : (CUR + dir + HITS.length) % HITS.length;
   const m = HITS[CUR];
   m.classList.add("cur");
-  const card = m.closest(".card"); if (card) card.classList.add("hasCur");
+  const card = m.closest(".tm, .card"); if (card) card.classList.add("hasCur");
   m.scrollIntoView({block:"center", behavior: first ? "auto" : "smooth"});
   paintPos();
 }
@@ -679,7 +659,7 @@ function wireTools(){
 
 /* ============================ footer ============================ */
 const FOOTER = `<footer>
-  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 9, 2026. New week posted each Tuesday.</p>
+  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 13, 2026. New week posted each Tuesday.</p>
   <h4>Where this comes from</h4>
   <p>2025 records, points for and against, and SRS are from Pro Football Reference. Posted win totals are the DraftKings and BetMGM numbers as re-checked in late August. Analyst rank is the Sharp Football Analysis pre Week 1 order, used as a single consistent expert baseline. Schedule, kickoff times, injury designations, and roster notes come from NFL.com, ESPN, NBC Sports, CBS Sports, Fox Sports, and team sites.</p>
   <p>Anything described as a positive or a concern is a reading of the consensus case, not a settled fact. Injury notes move constantly and reflect reporting as of the date on each week tab.</p>
@@ -782,12 +762,59 @@ function openStats(key){
   document.body.style.overflow = "hidden";
   document.getElementById("ovx").addEventListener("click", closeStats);
 }
+/* team breakdown overlay: matchup preview, positives, negatives, keys to victory */
+function openTeam(ab, key){
+  const w = WEEKS.find(x=>x.id===ACTIVE); if(!w) return;
+  const games = w.games||[];
+  const g = games.find(x=>x.away+"-"+x.home===key) || games.find(x=>x.away===ab||x.home===ab);
+  const t = T[ab]; if(!t) return;
+  const entry = (w.teams||{})[ab] || {};
+  const ctx = [];
+  if (g){
+    const home = g.home===ab, opp = T[home?g.away:g.home], k = kickOf(g);
+    if (g.awayScore!=null && g.homeScore!=null){
+      const mine = home?g.homeScore:g.awayScore, theirs = home?g.awayScore:g.homeScore;
+      const res = mine>theirs?"Won":mine<theirs?"Lost":"Tied";
+      ctx.push(`${res} ${mine}-${theirs} ${home?"vs":"at"} ${opp.name}`);
+    } else ctx.push(`${home?"vs":"at"} ${opp.name} &middot; ${k.day} &middot; ${k.time}`);
+    if (g.tv) ctx.push(g.tv);
+  }
+  ctx.push(`${t.rec} in 2025 &middot; Rank ${t.rank}`);
+  const sec = (label, tone, items) => `<div class="ovsec ${tone}">${label}</div>` +
+    (items && items.length ? `<ul class="ovkeys">${li(items)}</ul>` : `<div class="pending">Nothing loaded for this section yet.</div>`);
+  document.getElementById("ovbox").innerHTML = `
+    <div class="ovhd">
+      <div class="row">
+        <div class="badge" style="background:${t.color};color:${txt(t.color)}">${t.ab}</div>
+        <div>
+          <h3 id="ovtitle">${t.name}</h3>
+          <div class="sub">${entry.headline ? entry.headline + "<br>" : ""}${ctx.join(" &middot; ")}</div>
+        </div>
+      </div>
+      <button class="x" id="ovx" aria-label="Close">&times;</button>
+    </div>
+    <div class="ovbody team">
+      ${sec("Matchup preview", "n", entry.matchup)}
+      ${sec("Positives", "up", entry.strengths)}
+      ${sec("Negatives", "down", entry.weaknesses)}
+      ${sec("Keys to victory", "info", g ? g.keys : [])}
+    </div>`;
+  document.getElementById("ov").classList.add("on");
+  document.body.style.overflow = "hidden";
+  document.getElementById("ovx").addEventListener("click", closeStats);
+}
 function closeStats(){
   document.getElementById("ov").classList.remove("on");
   document.body.style.overflow = "";
 }
 document.getElementById("view").addEventListener("click", e=>{
-  const b = e.target.closest(".fsbtn"); if (b) openStats(b.dataset.game);
+  const b = e.target.closest(".fsbtn"); if (b) return openStats(b.dataset.game);
+  const s = e.target.closest(".tm"); if (s) openTeam(s.dataset.team, s.dataset.game);
+});
+document.getElementById("view").addEventListener("keydown", e=>{
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const s = e.target.closest(".tm"); if (!s || e.target !== s) return;
+  e.preventDefault(); openTeam(s.dataset.team, s.dataset.game);
 });
 document.getElementById("ov").addEventListener("click", e=>{ if (e.target.id==="ov") closeStats(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeStats(); });

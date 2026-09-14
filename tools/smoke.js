@@ -41,10 +41,10 @@ dom.window.addEventListener('load', () => {
   check('no script errors', errs.length === 0, errs.join(' | ') || 'none');
   check('opens on Week 1', g('ACTIVE') === 'wk1', g('ACTIVE'));
   check('16 games', n('.game') === 16, n('.game'));
-  check('32 team cards', n('.card') === 32, n('.card'));
-  check('160 panels', n('.panel') === 160, n('.panel'));
+  check('16 combined game cards', n('.card.duo') === 16, n('.card.duo'));
+  check('32 team sides', n('.tm') === 32, n('.tm'));
+  check('32 panels, rankings only', n('.panel') === 32, n('.panel'));
   check('32 rank panels', n('.panel.rank') === 32, n('.panel.rank'));
-  check('32 next panels', n('.panel.nx') === 32, n('.panel.nx'));
   check('19 week tabs (guide + 18 weeks)', n('.wtab') === 19, n('.wtab'));
 
   click('.wtab[data-id="guide"]');
@@ -56,10 +56,10 @@ dom.window.addEventListener('load', () => {
 
   click('.wtab[data-id="wk1"]');
   click('.chip[data-conf="AFC"]');
-  check('AFC filter hides 16 cards', n('.card.hide') === 16, n('.card.hide'));
+  check('AFC filter hides 16 team sides', n('.tm.hide') === 16, n('.tm.hide'));
   click('.chip[data-conf="all"]');
 
-  const q = d.getElementById('q'); q.value = 'Mahomes'; q.dispatchEvent(new w.Event('input', { bubbles: true }));
+  const q = d.getElementById('q'); q.value = 'sea'; q.dispatchEvent(new w.Event('input', { bubbles: true }));
   const hits = g('HITS.length'), cur0 = g('CUR');
   w.step(1);
   check('search returns hits and cycles', hits > 0 && cur0 === 0 && g('CUR') === 1, hits + ' hits');
@@ -70,6 +70,11 @@ dom.window.addEventListener('load', () => {
   check('stats overlay opens', d.getElementById('ov').classList.contains('on') && d.getElementById('ovbox').innerHTML.length > 0);
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes overlay', !d.getElementById('ov').classList.contains('on'));
+
+  click('.tm[data-team="SEA"]');
+  check('team overlay opens with four detail sections', d.getElementById('ov').classList.contains('on') && d.getElementById('ovtitle').textContent === 'Seattle Seahawks' && n('.ovbody .ovsec') === 4 && n('.ovbody .ovkeys li') >= 8, n('.ovbody .ovkeys li') + ' bullets');
+  d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  check('Escape closes team overlay', !d.getElementById('ov').classList.contains('on'));
 
   const wk = w.blankTemplate(); wk.id = 'wk99'; wk.label = 'Week 99'; wk.headline = 'Synthetic'; wk.intro = 'Round trip';
   wk.games = [{ away: 'DET', home: 'BUF', day: 'Thu', time: '8:15 PM ET', kick: '2026-09-18T00:15:00Z', tv: 'Prime Video', venue: 'Highmark Stadium', awayScore: 20, homeScore: 24 }];
