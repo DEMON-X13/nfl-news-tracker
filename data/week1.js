@@ -6,7 +6,7 @@
    ============================================================ */
 
 const WEEK1 = {
-  id:"wk1", label:"Week 1", type:"preview", status:"live",
+  id:"wk1", label:"Week 1", type:"preview", status:"live", updated:"September 13, 2026",
   dates:"Wednesday, September 9 to Monday, September 14, 2026",
   headline:"All 32 teams open across four days",
   intro:"Click any game for the full breakdown: each team's matchup preview, positives, negatives, and keys to victory, with the stat comparison at the bottom.",

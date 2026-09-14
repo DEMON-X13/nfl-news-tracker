@@ -1,9 +1,11 @@
 # Weekly research request
 
-Hand this to Claude (Claude Code or the app) on Wednesday, replacing N with the week number.
-It returns one JSON object. Save it as `data/weekN.js` in the form `const WEEKN = {...};`,
-add the week to `data/weeks.js`, add a script tag to `index.html`, run `node tools/smoke.js`,
-commit, push. Full steps are in HANDOFF.md under Weekly workflow.
+Wednesday: run `node tools/pull-week.js N` first. It drafts `data/weekN.js` with every game filled in,
+refreshes `data/results.js` and `data/stats2026.js`, and writes the reading pack to `tools/out/`.
+Then research with the panel in `tools/sources.md` and fill the narrative fields below in the draft.
+The schema is the same whether the file is produced by hand or by the script. Set `updated` to the day
+you publish. Then add the script tag to `index.html`, append the week in `data/weeks.js`, run
+`node tools/smoke.js`, commit, push.
 
 ---
 

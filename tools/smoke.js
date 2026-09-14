@@ -71,6 +71,10 @@ dom.window.addEventListener('load', () => {
   check('a later week takes over the page', n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'));
   click('.slot');
   check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 6 && n('.ovbody .sbar') === 11, n('.duo2 .tbsec.empty') + ' empty rows');
+  // results file: a score for a Week 99 game flows into the week at load
+  w.eval('RESULTS["wk99:DET-BUF"] = [3, 7]; WEEKS[WEEKS.length-1].games[0].awayScore = null; WEEKS[WEEKS.length-1].games[0].homeScore = null; applyResultsAgain();');
+  check('results.js scores merge into a week', g('WEEKS[WEEKS.length-1].games[0].homeScore') === 7);
+  check('footer date follows the week file', d.querySelector('footer').textContent.includes('Last updated'));
   check('no errors after interactions', errs.length === 0, errs.join(' | ') || 'none');
 
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');

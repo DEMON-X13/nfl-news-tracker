@@ -60,6 +60,18 @@ function record(ab){
   return w + "-" + l + (t ? "-" + t : "");
 }
 
+/* Final scores from data/results.js flow into the week files at load, so records and Final labels
+   stay current without editing a week. Keys are "wk<n>:AWAY-HOME". */
+function applyResultsAgain(){ applyResults(); }
+function applyResults(){
+  if (typeof RESULTS === "undefined") return;
+  WEEKS.forEach(wk => (wk.games||[]).forEach(g => {
+    const r = RESULTS[wk.id + ":" + g.away + "-" + g.home];
+    if (r && g.awayScore == null && g.homeScore == null) { g.awayScore = r[0]; g.homeScore = r[1]; }
+  }));
+}
+applyResults();
+
 /* ============================ state ============================ */
 let ACTIVE = WEEKS[WEEKS.length-1].id;
 function currentWeek(){ return WEEKS.find(x=>x.id===ACTIVE) || WEEKS[WEEKS.length-1]; }
@@ -100,7 +112,7 @@ function renderWeek(w){
     </div>
   </section>
 
-  ${FOOTER}`;
+  ${FOOTER()}`;
 }
 
 /* ============================ game overlay ============================ */
@@ -135,10 +147,14 @@ function openGame(key){
   };
 
   /* stat breakdown. A week's own per-team "stats" (2026 season to date) wins; otherwise the 2025 baseline. */
-  const statsOf = ab => ((w.teams||{})[ab]||{}).stats || STATS25[ab] || {};
+  const s26 = ab => (typeof STATS26 !== "undefined" && STATS26[ab]) ? STATS26[ab] : null;
+  const src = ab => ((w.teams||{})[ab]||{}).stats ? "week" : s26(ab) ? "2026" : "2025";
+  const statsOf = ab => ((w.teams||{})[ab]||{}).stats || s26(ab) || STATS25[ab] || {};
   const sa = statsOf(g.away), sh = statsOf(g.home);
-  const live = !!(((w.teams||{})[g.away]||{}).stats && ((w.teams||{})[g.home]||{}).stats);
-  const basis = live ? "2026 season to date" : "2025 season, per game";
+  const srcs = [src(g.away), src(g.home)];
+  const basis = srcs.every(x => x !== "2025")
+    ? "2026 season to date" + (typeof STATS26_THROUGH !== "undefined" && srcs.includes("2026") ? " through " + STATS26_THROUGH : "") + ", per game"
+    : srcs.every(x => x === "2025") ? "2025 season, per game" : "mixed: 2026 where available, 2025 otherwise, per game";
   const r1 = v => (v == null || isNaN(v)) ? null : Math.round(v*10)/10;
   const rows = [
     {label:"Point differential", a:r1(sa.ppg - sa.pa), h:r1(sh.ppg - sh.pa), hi:"a", sign:true, note:"per game"},
@@ -203,8 +219,8 @@ function closeOv(){
 }
 
 /* ============================ footer ============================ */
-const FOOTER = `<footer>
-  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 13, 2026. New week posted each Wednesday.</p>
+const FOOTER = () => `<footer>
+  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated ${currentWeek().updated || "September 13, 2026"}. New week posted each Wednesday.</p>
 </footer>`;
 
 /* ============================ boot ============================ */
