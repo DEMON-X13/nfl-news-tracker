@@ -9,7 +9,7 @@ This is the model. The sources are fixed. The reading happens every Wednesday.
 | Schedule, kickoff (UTC), TV, venue | ESPN scoreboard feed, `site.api.espn.com/.../scoreboard?seasontype=2&week=N&dates=2026` | Works from Node with a browser user agent. Blocked from curl. |
 | Final scores for past weeks | Same feed, weeks 1 to N-1 | Written to `data/results.js`. Records and Final labels update from it. |
 | Betting line and total | Same feed, `odds[0].details` and `overUnder` | Present for upcoming games only. |
-| Team stats, season to date | TeamRankings `/nfl/stat/<slug>?date=today` | Slugs: points-per-game, opponent-points-per-game, yards-per-play, opponent-yards-per-play, turnover-margin-per-game, sacks-per-game, qb-sacked-per-game, third-down-conversion-pct, red-zone-scoring-pct. Season column includes playoffs once they start. |
+| Team stats, season to date (2026 only, zeros before a team has played) | TeamRankings `/nfl/stat/<slug>?date=today` | Slugs: points-per-game, opponent-points-per-game, yards-per-play, opponent-yards-per-play, turnover-margin-per-game, sacks-per-game, qb-sacked-per-game, third-down-conversion-pct, red-zone-scoring-pct. Season column includes playoffs once they start. |
 | Explosive plays (20+ yards) | ESPN core team statistics, `passingBigPlays + rushingBigPlays` over games played | ESPN calls them big plays. |
 | Injuries | ESPN injuries feed, `site.api.espn.com/.../nfl/injuries` | One call, all teams. Status, body part, short comment. |
 | Team headlines | ESPN team news feed per team, `.../teams/<id>/news?limit=8` | Headlines and links only. Read the ones that matter. |

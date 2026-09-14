@@ -56,7 +56,8 @@ dom.window.addEventListener('load', () => {
   check('record chips show the 2026 record', [...d.querySelectorAll('.tbhd .chips .pill:not(.big) b')].map(b => b.textContent).join(' ') === '0-1 1-0' && d.querySelector('.tbhd .chips .pill:not(.big)').textContent.includes('2026'), [...d.querySelectorAll('.tbhd .chips .pill:not(.big)')].map(p => p.textContent).join(' | '));
   check('eleven stat rows with divided bars', n('.ovbody .sbar') === 11 && n('.ovbody .sbar .half') === 22, n('.ovbody .sbar') + ' rows');
   check('stat labels in order', [...d.querySelectorAll('.ovbody .sbar .lb')].map(e => e.firstChild.textContent).join('|') === 'Point differential|Points per game|Points allowed|Yards per play|Yards per play allowed|Turnover margin|Sacks|Sacks allowed|Third down rate|Red zone TD rate|Explosive plays');
-  check('baseline numbers filled for both teams', ![...d.querySelectorAll('.ovbody .sv')].some(e => e.textContent.includes('\u2013')) && d.querySelector('.ovbody .ovsub').textContent.includes('2025'));
+  check('2026 only: zeros before the first pull, no dashes', ![...d.querySelectorAll('.ovbody .sv')].some(e => e.textContent.includes('\u2013')) && [...d.querySelectorAll('.ovbody .sv')].every(e => /^0%?$/.test(e.textContent)) && d.querySelector('.ovbody .ovsub').textContent.includes('2026') && !d.querySelector('.ovbody .ovsub').textContent.includes('2025'), d.querySelector('.ovbody .ovsub').textContent);
+  check('empty bars when both sides are zero', [...d.querySelectorAll('.ovbody .half i')].every(i => i.style.width === '0%'));
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes overlay', !ov.classList.contains('on'));
 

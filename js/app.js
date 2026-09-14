@@ -146,15 +146,14 @@ function openGame(key){
     </div>`;
   };
 
-  /* stat breakdown. A week's own per-team "stats" (2026 season to date) wins; otherwise the 2025 baseline. */
+  /* stat breakdown, 2026 season only. A week's own per-team "stats" wins, then data/stats2026.js.
+     A team with no games yet shows zeros. */
+  const ZERO = {ppg:0, pa:0, ypp:0, yppa:0, to:0, sk:0, ska:0, third:0, rz:0, expl:0};
   const s26 = ab => (typeof STATS26 !== "undefined" && STATS26[ab]) ? STATS26[ab] : null;
-  const src = ab => ((w.teams||{})[ab]||{}).stats ? "week" : s26(ab) ? "2026" : "2025";
-  const statsOf = ab => ((w.teams||{})[ab]||{}).stats || s26(ab) || STATS25[ab] || {};
+  const statsOf = ab => Object.assign({}, ZERO, s26(ab) || {}, ((w.teams||{})[ab]||{}).stats || {});
   const sa = statsOf(g.away), sh = statsOf(g.home);
-  const srcs = [src(g.away), src(g.home)];
-  const basis = srcs.every(x => x !== "2025")
-    ? "2026 season to date" + (typeof STATS26_THROUGH !== "undefined" && srcs.includes("2026") ? " through " + STATS26_THROUGH : "") + ", per game"
-    : srcs.every(x => x === "2025") ? "2025 season, per game" : "mixed: 2026 where available, 2025 otherwise, per game";
+  const through = (typeof STATS26_THROUGH !== "undefined" && STATS26_THROUGH) ? " through " + STATS26_THROUGH : "";
+  const basis = "2026 season" + through + ", per game";
   const r1 = v => (v == null || isNaN(v)) ? null : Math.round(v*10)/10;
   const rows = [
     {label:"Point differential", a:r1(sa.ppg - sa.pa), h:r1(sh.ppg - sh.pa), hi:"a", sign:true, note:"per game"},
@@ -171,8 +170,8 @@ function openGame(key){
   ].concat(g.rows||[]);
   const bar = r => {
     const x = parseFloat(r.a), y = parseFloat(r.h);
-    let pa = 50, ph = 50;
-    if (!isNaN(x) && !isNaN(y)){
+    let pa = 0, ph = 0;
+    if (!isNaN(x) && !isNaN(y) && !(x === 0 && y === 0)){
       if (r.hi === "lo"){ const ix = 1/Math.max(x,.01), iy = 1/Math.max(y,.01); pa = ix/(ix+iy)*100; }
       else { const lo = Math.min(x,y,0), sx = x-lo, sy = y-lo; pa = (sx+sy)===0 ? 50 : sx/(sx+sy)*100; }
       ph = 100-pa;
