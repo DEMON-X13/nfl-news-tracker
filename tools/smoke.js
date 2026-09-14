@@ -37,49 +37,34 @@ dom.window.addEventListener('load', () => {
   const n = sel => d.querySelectorAll(sel).length;
   const click = sel => { const el = d.querySelector(sel); if (!el) throw new Error('missing ' + sel); el.dispatchEvent(new w.MouseEvent('click', { bubbles: true })); return el; };
   const g = expr => w.eval(expr);   // top-level const/let live in script scope, not on window
+  const ov = d.getElementById('ov');
 
   check('no script errors', errs.length === 0, errs.join(' | ') || 'none');
-  check('opens on Week 1', g('ACTIVE') === 'wk1', g('ACTIVE'));
-  check('16 games', n('.game') === 16, n('.game'));
-  check('16 combined game cards', n('.card.duo') === 16, n('.card.duo'));
-  check('32 team sides', n('.tm') === 32, n('.tm'));
-  check('64 snapshot panels, positives and negatives', n('.panel') === 64 && n('.snap .panel.up') === 32 && n('.snap .panel.down') === 32, n('.panel'));
-  check('rank shown in every title', n('.tm .pill.big') === 32, n('.tm .pill.big'));
-  check('19 week tabs (guide + 18 weeks)', n('.wtab') === 19, n('.wtab'));
+  check('shows Week 1', g('ACTIVE') === 'wk1' && d.getElementById('barweek').textContent.includes('Week 1'), d.getElementById('barweek').textContent);
+  check('16 game tiles', n('.slot') === 16, n('.slot'));
+  check('no week tabs, search, or team cards on the page', n('.wtab') === 0 && !d.getElementById('q') && n('.card') === 0);
+  check('played games show a score', n('.slot .score') === 2, n('.slot .score'));
 
-  click('.wtab[data-id="guide"]');
-  check('season guide renders 32 cards', n('.card') === 32 && n('.game') === 0);
-  const first = () => d.querySelector("#board tbody tr td").textContent;
-  click("#board th[data-k=\"pf\"]"); const desc = first();     // first click on a number column sorts high to low
-  click("#board th[data-k=\"pf\"]"); const asc = first();      // second click flips it
-  check("board sorts on header clicks", desc !== asc && d.querySelector("#board th[data-k=\"pf\"]").getAttribute("aria-sort") === "ascending", desc + " / " + asc);
-
-  click('.wtab[data-id="wk1"]');
-  click('.chip[data-conf="AFC"]');
-  check('AFC filter hides 16 team sides', n('.tm.hide') === 16, n('.tm.hide'));
-  click('.chip[data-conf="all"]');
-
-  const q = d.getElementById('q'); q.value = 'sea'; q.dispatchEvent(new w.Event('input', { bubbles: true }));
-  const hits = g('HITS.length'), cur0 = g('CUR');
-  w.step(1);
-  check('search returns hits and cycles', hits > 0 && cur0 === 0 && g('CUR') === 1, hits + ' hits');
-  click('#qx');
-  check('clear search resets', g('HITS.length') === 0 && q.value === '');
-
-  click('.fsbtn');
-  check('stats overlay opens', d.getElementById('ov').classList.contains('on') && d.getElementById('ovbox').innerHTML.length > 0);
+  click('.slot[data-game="NE-SEA"]');
+  const title = d.getElementById('ovtitle') ? d.getElementById('ovtitle').textContent : '';
+  check('game overlay opens', ov.classList.contains('on') && title.includes('New England Patriots') && title.includes('Seattle Seahawks'), title);
+  check('both teams in the overlay', n('.ovbody .tb') === 2 && n('.ovbody .tbsec.up') === 2 && n('.ovbody .tbsec.down') === 2);
+  check('setup and keys sections present', [...d.querySelectorAll('.ovbody .ovsec')].map(e => e.textContent).join('|').includes('How the game sets up') && n('.ovbody .ovkeys li') >= 6, n('.ovbody .ovkeys li') + ' bullets');
+  check('stat breakdown at the bottom', n('.ovbody .sbar') >= 12, n('.ovbody .sbar') + ' bars');
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  check('Escape closes overlay', !d.getElementById('ov').classList.contains('on'));
+  check('Escape closes overlay', !ov.classList.contains('on'));
 
-  click('.tm[data-team="SEA"]');
-  check('team overlay opens with the full breakdown', d.getElementById('ov').classList.contains('on') && d.getElementById('ovtitle').textContent === 'Seattle Seahawks' && n('.ovbody .ovsec') >= 6 && n('.ovbody .ovkeys li') >= 14 && n('.ovbody .nrow') >= 7, n('.ovbody .ovkeys li') + ' bullets');
-  d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  check('Escape closes team overlay', !d.getElementById('ov').classList.contains('on'));
+  click('.slot[data-game="DEN-KC"]');
+  check('a second game opens', ov.classList.contains('on') && d.getElementById('ovtitle').textContent.includes('Kansas City Chiefs'));
+  click('#ovx');
+  check('X closes overlay', !ov.classList.contains('on'));
 
   const wk = w.blankTemplate(); wk.id = 'wk99'; wk.label = 'Week 99'; wk.headline = 'Synthetic'; wk.intro = 'Round trip';
   wk.games = [{ away: 'DET', home: 'BUF', day: 'Thu', time: '8:15 PM ET', kick: '2026-09-18T00:15:00Z', tv: 'Prime Video', venue: 'Highmark Stadium', awayScore: 20, homeScore: 24 }];
   d.getElementById('io').value = JSON.stringify(wk); click('#btn-load');
-  check('JSON load adds and shows a week', g('ACTIVE') === 'wk99' && g('WEEKS.length') === 2 && n('.game') === 1, d.getElementById('status').textContent);
+  check('JSON load shows the new week', g('ACTIVE') === 'wk99' && g('WEEKS.length') === 2 && n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'), d.getElementById('status').textContent);
+  click('.slot');
+  check('overlay works for a loaded week with no writeups', ov.classList.contains('on') && n('.ovbody .pending') === 2 && n('.ovbody .sbar') >= 12);
   check('no errors after interactions', errs.length === 0, errs.join(' | ') || 'none');
 
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');

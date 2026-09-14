@@ -1,212 +1,13 @@
-/* Runtime list of weeks. Week 1 is baked in; weeks.json is merged on top at load. */
+/* Runtime list of weeks. Week 1 is baked in; weeks.json is merged on top at load.
+   The page shows one week at a time: the newest one loaded. */
 const WEEKS = [WEEK1];
 
 /* ============================ helpers ============================ */
 const T = {}; TEAMS.forEach(t => T[t.ab] = t);
-const DIVS = ["AFC East","AFC North","AFC South","AFC West","NFC East","NFC North","NFC South","NFC West"];
-const DIVNOTE = {
-  "AFC East":"New England won it at 14-3. Miami is rebuilding.",
-  "AFC North":"Three of four teams changed head coaches.",
-  "AFC South":"Two 12-win teams and two three-win teams.",
-  "AFC West":"Widely rated the strongest division in football.",
-  "NFC East":"Philadelphia repeat, or a rebuilt Dallas defense.",
-  "NFC North":"Four teams within two games of each other.",
-  "NFC South":"Won with eight wins in each of the last two years.",
-  "NFC West":"The champion, the favorite, and a 12-win team."
-};
-const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-");
-const sign = n => (n>0?"+":"") + n;
 const esc  = s => String(s).replace(/<[^>]+>/g,"").replace(/"/g,"");
 const li   = a => a.map(x=>`<li>${x}</li>`).join("");
 const txt  = c => { const r=parseInt(c.slice(1,3),16),g=parseInt(c.slice(3,5),16),b=parseInt(c.slice(5,7),16); return (r*299+g*587+b*114)/1000 > 140 ? "#332E29" : "#fff"; };
-const ICON = {
-  n:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12h16M4 6h16M4 18h10"/></svg>`,
-  up:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>`,
-  rank:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>`,
-  next:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
-  down:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"/><path d="M10.3 3.9L2.6 17.3A2 2 0 004.3 20h15.4a2 2 0 001.7-2.7L13.7 3.9a2 2 0 00-3.4 0z"/></svg>`
-};
-
-/* ============================ state ============================ */
-let ACTIVE = "guide";
-let conf = "all";
-
-/* ============================ tabs ============================ */
-function buildNav(){
-  const upcoming = [];
-  for (let w = 2; w <= 18; w++) if (!WEEKS.some(x=>x.id==="wk"+w)) upcoming.push(w);
-  document.getElementById("weeknav").innerHTML =
-    `<button class="wtab" role="tab" data-id="guide">Season guide</button>` +
-    WEEKS.map(w=>`<button class="wtab ${w.status==="sample"?"sample":""}" role="tab" data-id="${w.id}">${w.label}</button>`).join("") +
-    upcoming.map(w=>`<button class="wtab" role="tab" disabled title="Not published yet">Wk ${w}</button>`).join("");
-  document.querySelectorAll(".wtab[data-id]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.id)));
-  tabEdges();
-}
-function tabEdges(){
-  const s = document.getElementById("weeknav"), wrap = document.getElementById("tabswrap");
-  if (!s || !wrap) return;
-  const max = s.scrollWidth - s.clientWidth;
-  wrap.classList.toggle("more-l", s.scrollLeft > 4);
-  wrap.classList.toggle("more-r", s.scrollLeft < max - 4);
-}
-function revealTab(id){
-  const b = document.querySelector('.wtab[data-id="' + id + '"]');
-  if (b && b.scrollIntoView) b.scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
-  setTimeout(tabEdges, 350);
-}
-function show(id){
-  ACTIVE = id;
-  document.querySelectorAll(".wtab[data-id]").forEach(b=>b.setAttribute("aria-selected", b.dataset.id===id));
-  revealTab(id);
-  document.getElementById("view").innerHTML = (id==="guide") ? renderGuide() : renderWeek(WEEKS.find(w=>w.id===id));
-  if (id==="guide") wireBoard();
-  wireTools();
-  apply();
-  window.scrollTo({top:0,behavior:"auto"});
-}
-
-/* ============================ guide tab ============================ */
-function renderGuide(){
-  return `
-  <section class="pagehead nosearch">
-    <div class="eyebrow"><i></i>Preseason reference</div>
-    <h2>Where every roster stood going into Week 1</h2>
-    <p>Each team gets three sections in the same order: what actually changed since last season, the case for them, and the case against them. This tab does not change during the year, so it stays a fixed point to measure the weeks against.</p>
-  </section>
-
-  <section class="sec nosearch">
-    <div class="sec-head"><h3>The board</h3><p>2025 results against where the market and the analysts had each team. Click a column to sort.</p></div>
-    <div class="tablewrap"><table id="board"><thead><tr>
-      <th data-k="name" data-t="s">Team</th><th data-k="rec" data-t="s">2025</th>
-      <th data-k="pf" data-t="n">PF</th><th data-k="pa" data-t="n">PA</th>
-      <th data-k="pd" data-t="n">Diff</th><th data-k="srs" data-t="n">SRS</th>
-      <th data-k="wt" data-t="n">Win total</th><th data-k="rank" data-t="n">Analyst rank</th>
-    </tr></thead><tbody></tbody></table></div>
-  </section>
-
-  ${DIVS.map(d=>`
-    <section class="div-block" data-conf="${d.slice(0,3)}">
-      <div class="div-head"><h3>${d}</h3><span>${DIVNOTE[d]}</span></div>
-      <div class="pair">
-      ${TEAMS.filter(t=>t.div===d).map(t=>teamCard(t, t.sub, [
-        {t:"What changed", tone:"n", items:t.facts},
-        {t:"The case for them", tone:"up", items:t.up},
-        {t:"The case against them", tone:"down", items:t.down}
-      ], [
-        ["2025", t.rec], ["diff", sign(t.pd)], ["SRS", sign(t.srs.toFixed(1))],
-        ["win total", t.wt], ["analyst rank", t.rank]
-      ])).join("")}
-      </div>
-    </section>`).join("")}
-  <p class="empty" id="empty">No team matches that search.</p>
-  ${FOOTER}`;
-}
-
-/* ============================ week tab ============================ */
-function renderWeek(w){
-  if (!w) return `<p class="empty on">That week is not loaded.</p>`;
-  const recap = w.type === "recap";
-  return `
-  <section class="pagehead nosearch">
-    <div class="eyebrow ${w.status==="sample"?"sample":""}"><i></i>${w.dates}</div>
-    <h2>${w.headline}</h2>
-    <p>${w.intro}</p>
-    ${w.status==="sample" ? `<p class="sampleflag"><strong>Sample data.</strong> Nothing on this tab is real. It exists to show what a played week looks like before one has been played.</p>` : ""}
-  </section>
-
-  <section class="sec nosearch">
-    <div class="sec-head"><h3>${recap ? "Results" : "The slate"}</h3><p>${w.games.length} games. Click one to jump to it. Kickoffs show in your local time${TZFMT?" ("+TZFMT+")":""}.</p></div>
-    <div class="slate">
-      ${w.games.map(g=>{
-        const a=T[g.away], h=T[g.home];
-        const sc = (g.awayScore!=null&&g.homeScore!=null) ? `<span class="score">${g.awayScore}<em style="color:var(--ink-3);font-weight:500;padding:0 3px">-</em>${g.homeScore}</span>` : "";
-        const k = kickOf(g);
-        return `<a class="slot" href="#g-${g.away}-${g.home}">
-          <div class="when">${k.day} &middot; ${k.time}</div>
-          <div class="vs"><i style="background:${a.color}"></i>${a.ab}<em>at</em><i style="background:${h.color}"></i>${h.ab}${sc}</div>
-          <div class="note">${g.tv} &middot; ${g.venue}</div></a>`;
-      }).join("")}
-    </div>
-  </section>
-
-  <div class="games">${w.games.map(g=>{
-    const a=T[g.away], h=T[g.home];
-    const sc = (g.awayScore!=null&&g.homeScore!=null) ? `Final ${g.awayScore}-${g.homeScore} &middot; ` : "";
-    const k = kickOf(g);
-    return `<section class="game" id="g-${g.away}-${g.home}">
-      <div class="game-head">
-        <h3><i style="background:${a.color}"></i>${a.name}<em>at</em><i style="background:${h.color}"></i>${h.name}</h3>
-        <div class="meta">${sc}${k.day}${sc?"":" &middot; "+k.time} &middot; ${g.tv}</div>
-      </div>
-      ${g.note?`<p class="game-note">${g.note}</p>`:""}
-      <button class="fsbtn" data-game="${g.away}-${g.home}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Full Stats Preview</button>
-      <article class="card duo">${teamSide(g, g.away, w)}${teamSide(g, g.home, w)}</article>
-    </section>`;
-  }).join("")}</div>
-
-  <p class="empty" id="empty">No team matches that search.</p>
-  ${TOOLS(w)}
-  ${FOOTER}`;
-}
-/* First sentence of a bullet, tags stripped, capped in length. The card shows this; the overlay shows the full bullet. */
-function snap(html, max){
-  const plain = String(html).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  const m = plain.match(/^[\s\S]*?[.!?](?=\s+[A-Z"]|$)/);
-  let s = m ? m[0] : plain;
-  max = max || 110;
-  if (s.length > max){
-    const cut = s.lastIndexOf(" ", max - 1);
-    s = s.slice(0, cut > 40 ? cut : max - 1).replace(/[,;:]$/, "") + "…";
-  }
-  return s;
-}
-
-/* One team's half of the combined game card. Click it to open the full breakdown. */
-function teamSide(g, ab, w){
-  const t = T[ab], entry = (w.teams||{})[ab] || {};
-  const sub = entry.headline || "No writeup loaded yet.";
-  const detail = [entry.matchup||[], entry.last||[], entry.strengths||[], entry.weaknesses||[], g.preview||[], g.keys||[]].map(a=>a.join(" ")).join(" ");
-  const search = esc([t.name, t.ab, t.div, sub, detail].join(" "));
-  const box = (label, tone, items) => `<div class="panel ${tone}">
-        <h5>${ICON[tone]}${label}</h5>
-        ${items && items.length ? `<ul>${items.map(x=>`<li>${snap(x, 92)}</li>`).join("")}</ul>` : `<div class="pending">Nothing loaded yet.</div>`}
-      </div>`;
-  return `<div class="tm" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}"
-      data-team="${ab}" data-game="${g.away}-${g.home}" role="button" tabindex="0" aria-label="Open the ${t.name} breakdown">
-    <div class="card-top">
-      <div class="row">
-        <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
-        <div class="who"><h4>${t.name}</h4><div class="sub">${sub}</div></div>
-        <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${t.rec}</b>2025</span></div>
-        <span class="tm-go" aria-hidden="true">&rsaquo;</span>
-      </div>
-    </div>
-    <div class="snap">
-      ${box("Positives", "up", entry.strengths)}
-      ${box("Negatives", "down", entry.weaknesses)}
-    </div>
-  </div>`;
-}
-
-/* ============================ ranks ============================ */
-const BASE = (()=>{
-  const rankBy = (arr, key, desc) => {
-    const s = [...arr].sort((a,b)=> desc ? b[key]-a[key] : a[key]-b[key]);
-    const m = {}; s.forEach((t,i)=> m[t.ab] = i+1); return m;
-  };
-  const off = rankBy(TEAMS,"pf",true);      // most points scored in 2025
-  const def = rankBy(TEAMS,"pa",false);     // fewest points allowed in 2025
-  const srs = rankBy(TEAMS,"srs",true);     // 2025 overall finish
-  const ppg = rankBy(TEAMS,"pf",true);      // points per game, 2025
-  const tom = rankBy(TEAMS,"to",true);      // turnover differential, 2025
-  const m = {}; TEAMS.forEach(t => m[t.ab] = {off:off[t.ab], def:def[t.ab], srs:srs[t.ab], ppg:ppg[t.ab], tom:tom[t.ab],
-    ppgv:Math.round(t.pf/17*10)/10, tov:t.to});
-  return m;
-})();
-function defaultGrades(ab){
-  const b = BASE[ab], t = T[ab];
-  return { overall:{rank:t.rank, prev:b.srs}, offense:{rank:b.off}, defense:{rank:b.def} };
-}
+const ORD  = n => { const s=["th","st","nd","rd"], v=n%100; return n + "<sup>" + (s[(v-20)%10]||s[v]||s[0]) + "</sup>"; };
 const TZFMT = (()=>{ try { return new Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch(e){ return ""; } })();
 function kickOf(g){
   const done = g.awayScore != null && g.homeScore != null;
@@ -221,26 +22,21 @@ function kickOf(g){
     };
   } catch(e){ return { day: g.day, time: g.time }; }
 }
-const ORD = n => { const s=["th","st","nd","rd"], v=n%100; return n + "<sup>" + (s[(v-20)%10]||s[v]||s[0]) + "</sup>"; };
-function deltaChip(g){
-  if (!g || g.rank==null || g.prev==null) return '<span class="delta none">0</span>';
-  const d = g.prev - g.rank;
-  if (d === 0) return '<span class="delta flat">even</span>';
-  return '<span class="delta ' + (d>0?"up":"down") + '">' + (d>0?"\u25B2":"\u25BC") + " " + Math.abs(d) + '</span>';
-}
-function gradeBlock(w, ab, grades){
-  const g = grades || defaultGrades(ab);
-  const cap = w.type === "outlook"
-    ? "Preseason rank, change since 2025 finish"
-    : "Rank after " + w.label + ", change from last week";
-  const cell = (lab, o) => `<div class="grade"><span class="lab">${lab}</span>
-    <span class="val">${o && o.rank!=null ? ORD(o.rank) : "&ndash;"}</span>${deltaChip(o)}</div>`;
-  return `<div class="gradecap">${cap}</div><div class="grades">
-    ${cell("Overall", g.overall)}${cell("Offense", g.offense)}${cell("Defense", g.defense)}
-  </div>`;
-}
 
-/* ============================ matchup block ============================ */
+/* ============================ ranks ============================ */
+/* Preseason fallbacks computed from TEAMS. A week's own "ranks" block overrides these. */
+const BASE = (()=>{
+  const rankBy = (arr, key, desc) => {
+    const s = [...arr].sort((a,b)=> desc ? b[key]-a[key] : a[key]-b[key]);
+    const m = {}; s.forEach((t,i)=> m[t.ab] = i+1); return m;
+  };
+  const off = rankBy(TEAMS,"pf",true);      // most points scored in 2025
+  const def = rankBy(TEAMS,"pa",false);     // fewest points allowed in 2025
+  const ppg = rankBy(TEAMS,"pf",true);      // points per game, 2025
+  const tom = rankBy(TEAMS,"to",true);      // turnover differential, 2025
+  const m = {}; TEAMS.forEach(t => m[t.ab] = {off:off[t.ab], def:def[t.ab], ppg:ppg[t.ab], tom:tom[t.ab], ppgv:Math.round(t.pf/17*10)/10, tov:t.to});
+  return m;
+})();
 function rk(ab, w){
   const t = T[ab], b = BASE[ab];
   const entry = (w.teams||{})[ab] || {};
@@ -253,223 +49,153 @@ function rk(ab, w){
     turnover:g.turnover|| {rank:b.tom, val:(b.tov>0?"+":"")+b.tov}
   };
 }
-function vsBlock(g, w){
-  const a = T[g.away], hm = T[g.home];
-  const ra = rk(g.away, w), rh = rk(g.home, w);
-  const row = (lab, x, y) => {
-    const bx = x.rank < y.rank, by = y.rank < x.rank;
-    return `<div class="vrow">
-      <div class="vnum ${bx?"better":""}">${ORD(x.rank)}</div>
-      <div class="vlab">${lab}</div>
-      <div class="vnum ${by?"better":""}">${ORD(y.rank)}</div>
+
+/* ============================ state ============================ */
+let ACTIVE = "wk1";
+function currentWeek(){ return WEEKS.find(x=>x.id===ACTIVE) || WEEKS[WEEKS.length-1]; }
+function show(id){ ACTIVE = id; render(); }
+function render(){
+  const w = currentWeek();
+  const bw = document.getElementById("barweek");
+  if (bw) bw.innerHTML = `<b>${w.label}</b><span>${w.dates}</span>`;
+  document.getElementById("view").innerHTML = renderWeek(w);
+  wireTools();
+}
+
+/* ============================ the page: one week, the slate ============================ */
+function renderWeek(w){
+  const recap = w.type === "recap";
+  return `
+  <section class="pagehead">
+    <div class="eyebrow ${w.status==="sample"?"sample":""}"><i></i>${w.dates}</div>
+    <h2>${w.headline}</h2>
+    <p>${w.intro}</p>
+    ${w.status==="sample" ? `<p class="sampleflag"><strong>Sample data.</strong> Nothing on this tab is real. It exists to show what a played week looks like before one has been played.</p>` : ""}
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><h3>${recap ? "Results" : "The slate"}</h3><p>${w.games.length} games. Click one for the full breakdown. Kickoffs show in your local time${TZFMT?" ("+TZFMT+")":""}.</p></div>
+    <div class="slate">
+      ${w.games.map(g=>{
+        const a=T[g.away], h=T[g.home], k=kickOf(g);
+        const done = g.awayScore!=null && g.homeScore!=null;
+        const sc = done ? `<span class="score">${g.awayScore}<em>-</em>${g.homeScore}</span>` : "";
+        return `<button class="slot" type="button" data-game="${g.away}-${g.home}" aria-label="Open ${a.name} at ${h.name}">
+          <div class="when">${k.day} &middot; ${k.time}</div>
+          <div class="vs"><i style="background:${a.color}"></i>${a.ab}<em>at</em><i style="background:${h.color}"></i>${h.ab}${sc}</div>
+          <div class="note">${g.tv} &middot; ${g.venue}</div>
+          ${g.note ? `<div class="hook">${g.note}</div>` : ""}
+          <div class="more">Full breakdown<span aria-hidden="true">&rsaquo;</span></div>
+        </button>`;
+      }).join("")}
+    </div>
+  </section>
+
+  ${TOOLS(w)}
+  ${FOOTER}`;
+}
+
+/* ============================ game overlay ============================ */
+/* Everything about one matchup: how it sets up, both teams in full, keys, then the stat breakdown. */
+function openGame(key){
+  const w = currentWeek(); if(!w) return;
+  const g = (w.games||[]).find(x=>x.away+"-"+x.home===key); if(!g) return;
+  const a = T[g.away], hm = T[g.home], k = kickOf(g);
+  const done = g.awayScore!=null && g.homeScore!=null;
+  const meta = [done ? `Final ${g.awayScore}-${g.homeScore}` : "", k.day, done ? "" : k.time, g.tv, g.venue, g.line||""].filter(Boolean).join(" &middot; ");
+
+  const sec = (label, tone, items, sub) => (!items || !items.length) ? "" :
+    `<div class="ovsec ${tone}">${label}${sub?`<span class="ovsub">${sub}</span>`:""}</div><ul class="ovkeys">${li(items)}</ul>`;
+
+  const teamBlock = ab => {
+    const t = T[ab], e = (w.teams||{})[ab] || {};
+    const home = g.home===ab;
+    const block = (label, tone, items) => (!items || !items.length) ? "" :
+      `<div class="tbsec ${tone}"><h5>${label}</h5><ul>${li(items)}</ul></div>`;
+    return `<div class="tb" style="--tc:${t.color}">
+      <div class="tbhd">
+        <div class="badge" style="background:${t.color};color:${txt(t.color)}">${t.ab}</div>
+        <div class="who"><h4>${t.name}</h4><div class="sub">${e.headline || (home ? "Home" : "Away")}</div></div>
+        <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${t.rec}</b>2025</span></div>
+      </div>
+      ${block("Matchup preview", "n", e.matchup)}
+      ${block("Positives", "up", e.strengths)}
+      ${block("Negatives", "down", e.weaknesses)}
+      ${block("Where they stand", "n", e.last)}
+      ${!(e.matchup||[]).length && !(e.strengths||[]).length && !(e.weaknesses||[]).length ? `<div class="pending" style="padding:10px 0">Nothing loaded for this team yet.</div>` : ""}
     </div>`;
   };
-  return `<div class="vsgrid">
-    <div class="vteam"><i style="background:${a.color}"></i>${a.ab}</div>
-    <div class="vh">rank of 32</div>
-    <div class="vteam r">${hm.ab}<i style="background:${hm.color}"></i></div>
-    ${row("Overall", ra.overall, rh.overall)}
-    ${row("Offense", ra.offense, rh.offense)}
-    ${row("Defense", ra.defense, rh.defense)}
-  </div>`;
-}
-function cmpTable(g, w){
-  const a = T[g.away], hm = T[g.home];
+
+  /* stat breakdown: current rankings, then team numbers, as paired bars */
   const num = v => Math.round(v*10)/10;
-  const base = [
+  const ra = rk(g.away, w), rh = rk(g.home, w);
+  const rankRows = [
+    {label:"Overall rank", a:ra.overall.rank, h:rh.overall.rank, hi:"lo", note:"of 32"},
+    {label:"Offense rank", a:ra.offense.rank, h:rh.offense.rank, hi:"lo", note:"of 32"},
+    {label:"Defense rank", a:ra.defense.rank, h:rh.defense.rank, hi:"lo", note:"of 32"},
+    {label:"Points per game rank", a:ra.ppg.rank, h:rh.ppg.rank, hi:"lo", note:"of 32"},
+    {label:"Turnover margin rank", a:ra.turnover.rank, h:rh.turnover.rank, hi:"lo", note:"of 32"}
+  ];
+  const rows = [
     {label:"Points per game", a:num(a.pf/17), h:num(hm.pf/17), hi:"a", note:"2025"},
     {label:"Points allowed", a:num(a.pa/17), h:num(hm.pa/17), hi:"lo", note:"2025"},
     {label:"Point differential", a:a.pd, h:hm.pd, hi:"sign", note:"2025"},
     {label:"SRS", a:num(a.srs), h:num(hm.srs), hi:"sign", note:"2025"},
+    {label:"Turnover margin", a:a.to, h:hm.to, hi:"sign", note:"2025"},
     {label:"Posted win total", a:a.wt, h:hm.wt, hi:"a", note:"2026"},
     {label:"Analyst rank", a:a.rank, h:hm.rank, hi:"lo", note:"of 32"}
-  ];
-  const rows = base.concat(g.rows||[]);
-  const fmtv = (v, hi) => (hi==="sign" && typeof v==="number" && v>0) ? "+"+v : v;
-  const cell = (v, other, hi) => {
-    const n = parseFloat(v), o = parseFloat(other);
-    const better = isNaN(n)||isNaN(o)||n===o ? false : (hi==="lo" ? n<o : n>o);
-    return `<td class="${better?"win":""}">${fmtv(v, hi)}</td>`;
+  ].concat(g.rows||[]);
+  const bar = r => {
+    const x = parseFloat(r.a), y = parseFloat(r.h);
+    let pa = 50, ph = 50;
+    if (!isNaN(x) && !isNaN(y)){
+      if (r.hi === "lo"){ const ix = 1/Math.max(x,.01), iy = 1/Math.max(y,.01); pa = ix/(ix+iy)*100; }
+      else { const lo = Math.min(x,y,0), sx = x-lo, sy = y-lo; pa = (sx+sy)===0 ? 50 : sx/(sx+sy)*100; }
+      ph = 100-pa;
+    }
+    const aw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? x<y : x>y) : false;
+    const hw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? y<x : y>x) : false;
+    const fmt = v => (r.hi==="sign" && typeof v==="number" && v>0) ? "+"+v : v;
+    return `<div class="sbar">
+      <div class="sv ${aw?"win":""}">${fmt(r.a)}</div>
+      <div class="mid"><span class="lb">${r.label}</span>
+        <span class="track"><i style="width:${pa}%;background:${a.color}"></i><i style="width:${ph}%;background:${hm.color}"></i></span>
+        ${r.note?`<span class="nt">${r.note}</span>`:""}</div>
+      <div class="sv ${hw?"win":""}">${fmt(r.h)}</div>
+    </div>`;
   };
-  return `<table class="cmp"><thead><tr>
-      <th>${a.ab}</th><th></th><th>${hm.ab}</th>
-    </tr></thead><tbody>
-    ${rows.map(r=>`<tr>
-      ${cell(r.a, r.h, r.hi)}
-      <td class="mid">${r.label}${r.note?`<small>${r.note}</small>`:""}</td>
-      ${cell(r.h, r.a, r.hi)}
-    </tr>`).join("")}
-  </tbody></table>`;
-}
-/* ============================ momentum ============================ */
-function streakOf(ab){
-  const res = [];
-  WEEKS.forEach(wk=>(wk.games||[]).forEach(g=>{
-    if (g.awayScore==null || g.homeScore==null) return;
-    if (g.away!==ab && g.home!==ab) return;
-    const home = g.home===ab, mine = home?g.homeScore:g.awayScore, th = home?g.awayScore:g.homeScore;
-    res.push(mine>th?"W":mine<th?"L":"T");
-  }));
-  if (!res.length) return {label:"Season opener", cls:"", note:"no games played"};
-  let n = 1;
-  for (let i=res.length-1; i>0 && res[i]===res[i-1]; i--) n++;
-  const k = res[res.length-1];
-  const w = res.filter(x=>x==="W").length, l = res.filter(x=>x==="L").length, t = res.filter(x=>x==="T").length;
-  const rec = w+"-"+l+(t?"-"+t:"");
-  if (k==="T") return {label:"Tied last out", cls:"", note:rec};
-  if (k==="W") return n>=3 ? {label:"Hot Streak! W"+n, cls:"hot", note:rec}
-              : n===2 ? {label:"Rolling, W2", cls:"warm", note:rec}
-              : {label:"Won last out", cls:"warm", note:rec};
-  return n>=3 ? {label:"Skid, L"+n, cls:"cool", note:rec}
-       : n===2 ? {label:"Cooling off, L2", cls:"cool", note:rec}
-       : {label:"Lost last out", cls:"cool", note:rec};
-}
 
-/* ============================ shared card ============================ */
-function teamCard(t, sub, sections, mini, extra){
-  const search = esc([t.name,t.ab,t.div,sub,sections.map(s=>s.t+" "+s.items.join(" ")).join(" "), extra||""].join(" "));
-  return `<article class="card" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}">
-    <div class="card-top">
-      <div class="row">
-        <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
-        <div><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+  document.getElementById("ovbox").innerHTML = `
+    <div class="ovhd">
+      <div>
+        <h3 id="ovtitle"><i style="background:${a.color}"></i>${a.name}<em>at</em><i style="background:${hm.color}"></i>${hm.name}</h3>
+        <div class="sub">${meta}</div>
       </div>
-      <div class="mini">${mini.map(m=>`<span class="pill ${m[2]||""}"><b>${m[1]}</b>${m[0]}</span>`).join("")}</div>
+      <button class="x" id="ovx" aria-label="Close">&times;</button>
     </div>
-    <div class="panels">${sections.map(s=>`
-      <div class="panel ${s.tone==="up"?"up":s.tone==="down"?"down":""} ${s.span?"span":""}">
-        <h5>${ICON[s.tone==="up"?"up":s.tone==="down"?"down":"n"]}${s.t}</h5>
-        ${s.items.length ? `<ul>${li(s.items)}</ul>` : `<div class="pending">Nothing loaded for this section yet.</div>`}
-      </div>`).join("")}${extra||""}</div>
-  </article>`;
+    <div class="ovbody game">
+      ${g.note ? `<p class="ovnote">${g.note}</p>` : ""}
+      ${sec("How the game sets up", "n", g.preview)}
+      <div class="duo2">${teamBlock(g.away)}${teamBlock(g.home)}</div>
+      ${sec("Keys to victory", "info", g.keys)}
+      <div class="ovsec n">Full stat breakdown<span class="ovsub">green marks the better number</span></div>
+      <div class="ovlegend">
+        <span><i style="background:${a.color}"></i>${a.name}</span>
+        <span><i style="background:${hm.color}"></i>${hm.name}</span>
+      </div>
+      <div class="ovsub2">Current rankings</div>
+      ${rankRows.map(bar).join("")}
+      <div class="ovsub2">Team numbers</div>
+      ${rows.map(bar).join("")}
+    </div>`;
+  const ov = document.getElementById("ov");
+  ov.classList.add("on"); ov.scrollTop = 0;
+  document.body.style.overflow = "hidden";
+  document.getElementById("ovx").addEventListener("click", closeOv);
 }
-
-/* ============================ board sorting ============================ */
-let boardRows=[], sortKey="rank", sortDir=1;
-function paintBoard(rows){
-  const tb = document.querySelector("#board tbody"); if(!tb) return;
-  tb.innerHTML = rows.map(t=>`<tr><td><a href="#${slug(t.name)}-guide"><i class="dot" style="background:${t.color}"></i>${t.name}</a></td>
-    <td>${t.rec}</td><td>${t.pf}</td><td>${t.pa}</td>
-    <td class="${t.pd>0?'pos':'neg'}">${sign(t.pd)}</td>
-    <td class="${t.srs>0?'pos':'neg'}">${sign(t.srs.toFixed(1))}</td>
-    <td>${t.wt}</td><td>${t.rank}</td></tr>`).join("");
-}
-function wireBoard(){
-  boardRows = [...TEAMS].sort((a,b)=>a.rank-b.rank); sortKey="rank"; sortDir=1;
-  paintBoard(boardRows);
-  document.querySelectorAll("#board th").forEach(th=>{
-    th.addEventListener("click",()=>{
-      const k=th.dataset.k, num=th.dataset.t==="n";
-      sortDir = (k===sortKey) ? -sortDir : (num?-1:1); sortKey=k;
-      boardRows.sort((a,b)=> num ? (a[k]-b[k])*sortDir : String(a[k]).localeCompare(String(b[k]))*sortDir);
-      document.querySelectorAll("#board th").forEach(x=>x.removeAttribute("aria-sort"));
-      th.setAttribute("aria-sort", sortDir===1?"ascending":"descending");
-      paintBoard(boardRows);
-    });
-  });
-  const rt = document.querySelector('#board th[data-k="rank"]'); if(rt) rt.setAttribute("aria-sort","ascending");
-}
-
-/* ============================ filtering ============================ */
-function apply(){
-  clearMarks();
-  const q = document.getElementById("q");
-  const term = (q.value||"").trim().toLowerCase();
-  document.body.classList.toggle("searching", !!term);
-  document.getElementById("qx").classList.toggle("on", !!term);
-  let shown = 0;
-  document.querySelectorAll(".card:not(.duo), .tm").forEach(c=>{
-    const on = (conf==="all"||c.dataset.conf===conf) && (!term || c.dataset.search.toLowerCase().includes(term));
-    c.classList.toggle("hide", !on); if(on) shown++;
-  });
-  document.querySelectorAll(".div-block, .game").forEach(s=>{
-    s.style.display = s.querySelectorAll(".card:not(.duo):not(.hide), .tm:not(.hide)").length ? "" : "none";
-  });
-  const r = document.getElementById("results");
-  SHOWN = shown;
-  if (term){
-    const label = ACTIVE==="guide" ? "the season guide" : (WEEKS.find(w=>w.id===ACTIVE)||{}).label;
-    r.innerHTML = `<span><b>${shown}</b> ${shown===1?"team":"teams"} in ${label}${conf!=="all"?" ("+conf+" only)":""}</span>
-      <span class="nav">
-        <span class="pos" id="rpos"></span>
-        <button type="button" id="rprev" title="Previous match (Shift+Enter)">&uarr;</button>
-        <button type="button" id="rnext" title="Next match (Enter)">&darr;</button>
-        <button type="button" id="rclear">Clear</button>
-      </span>`;
-    r.classList.add("on");
-    document.getElementById("rclear").addEventListener("click", clearSearch);
-    document.getElementById("rprev").addEventListener("click", ()=>step(-1));
-    document.getElementById("rnext").addEventListener("click", ()=>step(1));
-    HITS = term.length >= 2 ? markAll(term) : [];
-    CUR = -1;
-    if (HITS.length) step(1, true);
-    paintPos();
-  } else { r.classList.remove("on"); r.innerHTML=""; }
-  const eEl=document.getElementById("empty"); if(eEl) eEl.classList.toggle("on", shown===0);
-}
-let HITS = [], CUR = -1, SHOWN = 0;
-function clearMarks(){
-  const root = document.getElementById("view"); if(!root) return;
-  root.querySelectorAll("mark.hit").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
-  root.querySelectorAll(".panel, .card-top, .nextrow, .nextvenue").forEach(n => n.normalize());
-  root.querySelectorAll(".hasCur").forEach(c => c.classList.remove("hasCur"));
-  HITS = []; CUR = -1;
-}
-function markAll(term){
-  const out = [];
-  document.querySelectorAll(".card:not(.duo):not(.hide), .tm:not(.hide)").forEach(card=>{
-    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, {
-      acceptNode(n){
-        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        if (n.parentElement && n.parentElement.closest("mark")) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    });
-    const nodes = []; let n;
-    while ((n = walker.nextNode())) nodes.push(n);
-    nodes.forEach(node=>{
-      const txt = node.nodeValue, low = txt.toLowerCase();
-      let i = low.indexOf(term);
-      if (i < 0) return;
-      const frag = document.createDocumentFragment();
-      let last = 0;
-      while (i >= 0){
-        if (i > last) frag.appendChild(document.createTextNode(txt.slice(last, i)));
-        const m = document.createElement("mark");
-        m.className = "hit";
-        m.textContent = txt.slice(i, i + term.length);
-        frag.appendChild(m); out.push(m);
-        last = i + term.length;
-        i = low.indexOf(term, last);
-      }
-      if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
-      node.parentNode.replaceChild(frag, node);
-    });
-  });
-  return out;
-}
-function paintPos(){
-  const el = document.getElementById("rpos"); if(!el) return;
-  el.textContent = HITS.length ? (CUR+1) + " of " + HITS.length : (SHOWN ? "matches in team details" : "no matches");
-  const p = document.getElementById("rprev"), nx = document.getElementById("rnext");
-  if (p) p.disabled = HITS.length < 2;
-  if (nx) nx.disabled = HITS.length < 2;
-}
-function step(dir, first){
-  if (!HITS.length) return;
-  if (HITS[CUR]){
-    HITS[CUR].classList.remove("cur");
-    const c = HITS[CUR].closest(".tm, .card"); if (c) c.classList.remove("hasCur");
-  }
-  CUR = first ? 0 : (CUR + dir + HITS.length) % HITS.length;
-  const m = HITS[CUR];
-  m.classList.add("cur");
-  const card = m.closest(".tm, .card"); if (card) card.classList.add("hasCur");
-  m.scrollIntoView({block:"center", behavior: first ? "auto" : "smooth"});
-  paintPos();
-}
-function clearSearch(){
-  const q=document.getElementById("q"); q.value=""; apply(); q.focus();
+function closeOv(){
+  document.getElementById("ov").classList.remove("on");
+  document.body.style.overflow = "";
 }
 
 /* ============================ data tools ============================ */
@@ -491,7 +217,7 @@ function TOOLS(w){
         <button class="btn ghost" id="btn-clear">Clear box</button>
       </div>
       <div class="status" id="status"></div>
-      <p class="hint">A loaded week lives in this browser tab only. To keep it for good, send the JSON back to Claude and get a rebuilt file with the week baked in.</p>
+      <p class="hint">A loaded week lives in this browser tab only. To publish it, export weeks.json and commit it next to index.html. The page always shows the newest week it has.</p>
     </div>
   </details>`;
 }
@@ -626,7 +352,7 @@ function toClipboard(text){
 }
 function wireTools(){
   const t = document.getElementById("tools"); if(!t) return;
-  const w = WEEKS.find(x=>x.id===ACTIVE);
+  const w = currentWeek();
   document.getElementById("btn-req").addEventListener("click", ()=>toClipboard(statRequest(w)));
   document.getElementById("btn-tmpl").addEventListener("click", ()=>{
     download("nfl-2026-week-template.json", JSON.stringify(blankTemplate(), null, 2)); say("Template downloaded.");
@@ -655,7 +381,6 @@ function wireTools(){
       const n = x => x.status==="sample" ? 999 : (parseInt((x.id.match(/\d+/)||[0])[0],10)||0);
       return n(a)-n(b);
     });
-    buildNav();
     show(list[0].id);
     say((added?added+" week added. ":"Week replaced. ") + "Now showing it.");
     document.getElementById("tools").open = true;
@@ -671,190 +396,11 @@ const FOOTER = `<footer>
 </footer>`;
 
 /* ============================ boot ============================ */
-document.getElementById("q").addEventListener("input", apply);
-document.getElementById("qx").addEventListener("click", clearSearch);
-document.getElementById("q").addEventListener("keydown", e=>{
-  if (e.key === "Escape") { clearSearch(); return; }
-  if (e.key === "Enter") { e.preventDefault(); step(e.shiftKey ? -1 : 1); }
-});
-document.querySelectorAll(".chip").forEach(b=>{
-  b.addEventListener("click",()=>{
-    conf = b.dataset.conf;
-    document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed", x===b));
-    apply();
-  });
-});
-(function wireTabScroll(){
-  const s = document.getElementById("weeknav");
-  s.addEventListener("scroll", tabEdges, {passive:true});
-  window.addEventListener("resize", tabEdges);
-  document.getElementById("tleft").addEventListener("click", ()=>{ s.scrollBy({left:-220, behavior:"smooth"}); setTimeout(tabEdges,350); });
-  document.getElementById("tright").addEventListener("click", ()=>{ s.scrollBy({left:220, behavior:"smooth"}); setTimeout(tabEdges,350); });
-  s.addEventListener("wheel", e=>{
-    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-    const max = s.scrollWidth - s.clientWidth;
-    if ((e.deltaY < 0 && s.scrollLeft <= 0) || (e.deltaY > 0 && s.scrollLeft >= max)) return;
-    e.preventDefault();
-    s.scrollLeft += e.deltaY;
-    tabEdges();
-  }, {passive:false});
-  setTimeout(tabEdges, 100);
-})();
-/* full stats overlay */
-function openStats(key){
-  const w = WEEKS.find(x=>x.id===ACTIVE); if(!w) return;
-  const g = (w.games||[]).find(x=>x.away+"-"+x.home===key); if(!g) return;
-  const a = T[g.away], hm = T[g.home], k = kickOf(g);
-  const num = v => Math.round(v*10)/10;
-  const rows = [
-    {label:"Points per game", a:num(a.pf/17), h:num(hm.pf/17), hi:"a", note:"2025"},
-    {label:"Points allowed", a:num(a.pa/17), h:num(hm.pa/17), hi:"lo", note:"2025"},
-    {label:"Point differential", a:a.pd, h:hm.pd, hi:"sign", note:"2025"},
-    {label:"SRS", a:num(a.srs), h:num(hm.srs), hi:"sign", note:"2025"},
-    {label:"Posted win total", a:a.wt, h:hm.wt, hi:"a", note:"2026"},
-    {label:"Analyst rank", a:a.rank, h:hm.rank, hi:"lo", note:"of 32"},
-    {label:"Turnover margin", a:a.to, h:hm.to, hi:"sign", note:"2025"}
-  ].concat(g.rows||[]);
-  const ra = rk(g.away, w), rh = rk(g.home, w);
-  const rankRows = [
-    {label:"Overall rank", a:ra.overall.rank, h:rh.overall.rank, hi:"lo", note:"of 32"},
-    {label:"Offense rank", a:ra.offense.rank, h:rh.offense.rank, hi:"lo", note:"of 32"},
-    {label:"Defense rank", a:ra.defense.rank, h:rh.defense.rank, hi:"lo", note:"of 32"},
-    {label:"Points per game rank", a:ra.ppg.rank, h:rh.ppg.rank, hi:"lo", note:"of 32"},
-    {label:"Turnover margin rank", a:ra.turnover.rank, h:rh.turnover.rank, hi:"lo", note:"of 32"}
-  ];
-  const bar = r => {
-    const x = parseFloat(r.a), y = parseFloat(r.h);
-    let pa = 50, ph = 50;
-    if (!isNaN(x) && !isNaN(y)){
-      if (r.hi === "lo"){ const ix = 1/Math.max(x,.01), iy = 1/Math.max(y,.01); pa = ix/(ix+iy)*100; }
-      else { const lo = Math.min(x,y,0), sx = x-lo, sy = y-lo; pa = (sx+sy)===0 ? 50 : sx/(sx+sy)*100; }
-      ph = 100-pa;
-    }
-    const aw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? x<y : x>y) : false;
-    const hw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? y<x : y>x) : false;
-    const fmt = v => (r.hi==="sign" && typeof v==="number" && v>0) ? "+"+v : v;
-    return `<div class="sbar">
-      <div class="sv ${aw?"win":""}">${fmt(r.a)}</div>
-      <div class="mid"><span class="lb">${r.label}</span>
-        <span class="track"><i style="width:${pa}%;background:${a.color}"></i><i style="width:${ph}%;background:${hm.color}"></i></span>
-        ${r.note?`<span class="nt">${r.note}</span>`:""}</div>
-      <div class="sv ${hw?"win":""}">${fmt(r.h)}</div>
-    </div>`;
-  };
-  const sc = (g.awayScore!=null) ? ` &middot; Final ${g.awayScore}-${g.homeScore}` : "";
-  document.getElementById("ovbox").innerHTML = `
-    <div class="ovhd">
-      <div>
-        <h3 id="ovtitle">${a.name} at ${hm.name}</h3>
-        <div class="sub">${k.day} &middot; ${k.time} &middot; ${g.tv} &middot; ${g.venue}${sc}${g.line?" &middot; "+g.line:""}</div>
-      </div>
-      <button class="x" id="ovx" aria-label="Close">&times;</button>
-    </div>
-    <div class="ovbody">
-      <div class="ovlegend">
-        <span><i style="background:${a.color}"></i>${a.name}</span>
-        <span><i style="background:${hm.color}"></i>${hm.name}</span>
-        <span>Green marks the better number</span>
-      </div>
-      <div class="ovsec">Current rankings</div>
-      ${rankRows.map(bar).join("")}
-      <div class="ovsec">Team numbers</div>
-      ${rows.map(bar).join("")}
-      ${(g.keys||[]).length ? `<div class="ovsec">What to watch</div><ul class="ovkeys">${li(g.keys)}</ul>` : ""}
-    </div>`;
-  document.getElementById("ov").classList.add("on");
-  document.body.style.overflow = "hidden";
-  document.getElementById("ovx").addEventListener("click", closeStats);
-}
-/* team breakdown overlay: the full text behind the card, plus the game context and the numbers */
-function openTeam(ab, key){
-  const w = WEEKS.find(x=>x.id===ACTIVE); if(!w) return;
-  const games = w.games||[];
-  const g = games.find(x=>x.away+"-"+x.home===key) || games.find(x=>x.away===ab||x.home===ab);
-  const t = T[ab]; if(!t) return;
-  const entry = (w.teams||{})[ab] || {};
-  const ctx = [];
-  let opp = null, home = false;
-  if (g){
-    home = g.home===ab; opp = T[home?g.away:g.home];
-    const k = kickOf(g);
-    if (g.awayScore!=null && g.homeScore!=null){
-      const mine = home?g.homeScore:g.awayScore, theirs = home?g.awayScore:g.homeScore;
-      const res = mine>theirs?"Won":mine<theirs?"Lost":"Tied";
-      ctx.push(`${res} ${mine}-${theirs} ${home?"vs":"at"} ${opp.name}`);
-    } else ctx.push(`${home?"vs":"at"} ${opp.name} &middot; ${k.day} &middot; ${k.time}`);
-    if (g.tv) ctx.push(g.tv);
-    if (g.line) ctx.push(g.line);
-  }
-  ctx.push(`${t.rec} in 2025 &middot; Rank ${t.rank}`);
-  const sec = (label, tone, items, sub) => {
-    if (!items || !items.length) return "";
-    return `<div class="ovsec ${tone}">${label}${sub?`<span class="ovsub">${sub}</span>`:""}</div><ul class="ovkeys">${li(items)}</ul>`;
-  };
-  const numbers = () => {
-    if (!opp) return "";
-    const num = v => Math.round(v*10)/10;
-    const a = t, b = opp;
-    const rows = [
-      {label:"Points per game", a:num(a.pf/17), b:num(b.pf/17), hi:"hi", note:"2025"},
-      {label:"Points allowed", a:num(a.pa/17), b:num(b.pa/17), hi:"lo", note:"2025"},
-      {label:"Point differential", a:a.pd, b:b.pd, hi:"hi", note:"2025", sign:true},
-      {label:"SRS", a:num(a.srs), b:num(b.srs), hi:"hi", note:"2025", sign:true},
-      {label:"Turnover margin", a:a.to, b:b.to, hi:"hi", note:"2025", sign:true},
-      {label:"Posted win total", a:a.wt, b:b.wt, hi:"hi", note:"2026"},
-      {label:"Analyst rank", a:a.rank, b:b.rank, hi:"lo", note:"of 32"}
-    ].concat((g.rows||[]).map(r=>({label:r.label, a:home?r.h:r.a, b:home?r.a:r.h, hi:r.hi==="lo"?"lo":"hi", note:r.note})));
-    const cell = (v, o, hi, sign) => {
-      const x = parseFloat(v), y = parseFloat(o);
-      const win = !isNaN(x) && !isNaN(y) && x!==y && (hi==="lo" ? x<y : x>y);
-      const txtv = (sign && typeof v==="number" && v>0) ? "+"+v : v;
-      return `<b class="${win?"win":""}">${txtv}</b>`;
-    };
-    return `<div class="ovsec n">By the numbers<span class="ovsub">${a.ab} vs ${b.ab}</span></div>
-      <div class="nums">
-        ${rows.map(r=>`<div class="nrow"><span class="nl">${r.label}${r.note?`<small>${r.note}</small>`:""}</span>${cell(r.a,r.b,r.hi,r.sign)}${cell(r.b,r.a,r.hi,r.sign)}</div>`).join("")}
-      </div>`;
-  };
-  const body =
-    sec("Matchup preview", "n", entry.matchup) +
-    sec("How the game sets up", "n", g ? g.preview : [], "both teams") +
-    sec("Where they stand", "n", entry.last) +
-    sec("Positives", "up", entry.strengths) +
-    sec("Negatives", "down", entry.weaknesses) +
-    sec("Keys to victory", "info", g ? g.keys : [], "both teams") +
-    numbers();
-  document.getElementById("ovbox").innerHTML = `
-    <div class="ovhd">
-      <div class="row">
-        <div class="badge" style="background:${t.color};color:${txt(t.color)}">${t.ab}</div>
-        <div>
-          <h3 id="ovtitle">${t.name}</h3>
-          <div class="sub">${entry.headline ? entry.headline + "<br>" : ""}${ctx.join(" &middot; ")}</div>
-        </div>
-      </div>
-      <button class="x" id="ovx" aria-label="Close">&times;</button>
-    </div>
-    <div class="ovbody team">${body || `<div class="pending" style="padding:16px 0">Nothing loaded for this team yet.</div>`}</div>`;
-  document.getElementById("ov").classList.add("on");
-  document.body.style.overflow = "hidden";
-  document.getElementById("ovx").addEventListener("click", closeStats);
-}
-function closeStats(){
-  document.getElementById("ov").classList.remove("on");
-  document.body.style.overflow = "";
-}
 document.getElementById("view").addEventListener("click", e=>{
-  const b = e.target.closest(".fsbtn"); if (b) return openStats(b.dataset.game);
-  const s = e.target.closest(".tm"); if (s) openTeam(s.dataset.team, s.dataset.game);
+  const s = e.target.closest(".slot"); if (s) openGame(s.dataset.game);
 });
-document.getElementById("view").addEventListener("keydown", e=>{
-  if (e.key !== "Enter" && e.key !== " ") return;
-  const s = e.target.closest(".tm"); if (!s || e.target !== s) return;
-  e.preventDefault(); openTeam(s.dataset.team, s.dataset.game);
-});
-document.getElementById("ov").addEventListener("click", e=>{ if (e.target.id==="ov") closeStats(); });
-document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeStats(); });
+document.getElementById("ov").addEventListener("click", e=>{ if (e.target.id==="ov") closeOv(); });
+document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeOv(); });
 document.getElementById("top").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 function latestWeekId(){
   const nums = WEEKS.map(w => parseInt((w.id.match(/\d+/)||[0])[0],10)||0);
@@ -873,8 +419,7 @@ function mergeWeeks(list){
   WEEKS.sort((a,b)=>((parseInt((a.id.match(/\d+/)||[0])[0],10)||0)-(parseInt((b.id.match(/\d+/)||[0])[0],10)||0)));
   return added;
 }
-buildNav();
-show("wk1");
+show(latestWeekId());
 
 /* When published, any weeks.json sitting next to this file is loaded and merged.
    Opening the file locally just skips this and uses the weeks baked in above. */
@@ -886,7 +431,6 @@ show("wk1");
       if (!data) return;
       const list = Array.isArray(data) ? data : [data];
       if (!mergeWeeks(list)) return;
-      buildNav();
       show(latestWeekId());
     })
     .catch(()=>{});
