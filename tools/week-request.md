@@ -19,8 +19,7 @@ For every GAME:
   preview   - 3 or 4 bullets. This is the centerpiece, so make it about THIS matchup, not team history:
                 the key individual or unit matchups, which way momentum is running, and the winning factor.
                 Lead with where the beat writers and analysts agree. If they split, say so in one bullet.
-  keys      - 3 to 5 deeper bullets shown when the reader expands the breakdown. Injuries that swing the
-                game, scheme wrinkles, head to head history with the numbers, situational splits.
+  keys      - optional. Game level notes are no longer displayed; put keys on each TEAM instead.
   rows      - optional extra stat comparison rows, each {label, a, h, hi, note} where "a" is the away value,
                 "h" is the home value, hi is "a" when higher is better or "lo" when lower is better, and note
                 is a short qualifier like "2026" or "per game". Use these for turnover differential, third
@@ -38,8 +37,10 @@ For every one of the 32 TEAMS:
                 edges, and who has to step up all belong here.
   weaknesses  - 4 or 5 bullets, shown as Negatives. Where it breaks down against THIS opponent, who is out,
                 and what beat writers flag as the concern, with numbers.
-                Start every strengths and weaknesses bullet with one short bold sentence under 90 characters.
-                The card shows only that first sentence. The full bullet appears when a reader opens the team.
+  keys        - 3 bullets, shown as Keys to victory. What THIS team has to do to win THIS game, phrased as an
+                instruction: protect X against Y, get Z the ball, survive without W. Name the players on both
+                sides and carry the numbers. If the game has been played, write them as what decided it.
+                Start every strengths, weaknesses, and keys bullet with one short bold sentence.
   ranks       - five ranks, each {rank, prev}, out of 32 with no ties. 1 is always best.
                   overall  - your read of the team right now, blending record, point differential, and how
                              they have actually played.
@@ -84,6 +85,7 @@ Schema:
       "last": ["what happened, with numbers"],
       "strengths": ["what they do well and who steps up"],
       "weaknesses": ["where it breaks down, injuries included"],
+      "keys": ["what this team has to do to win this game"],
       "ranks": {
         "overall": { "rank": 3, "prev": 3 },
         "offense": { "rank": 6, "prev": 2 },
