@@ -137,7 +137,7 @@ a{color:inherit}
 .sbar .mid{text-align:center}
 .sbar .mid .lb{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.02em;display:block;margin-bottom:5px}
 .sbar .mid .lb small{font-weight:600;color:var(--ink-3);margin-left:5px;font-size:10px}
-.sbar .mid .track{display:flex;gap:8px;width:min(100%,360px);margin:0 auto}
+.sbar .mid .track{display:flex;gap:10px;width:100%}
 .sbar .mid .half{flex:1 1 0;height:5px;border-radius:3px;background:var(--sunk-2);display:flex;overflow:hidden}
 .sbar .mid .half.l{justify-content:flex-end}
 .sbar .mid .half i{display:block;height:100%;border-radius:3px}
