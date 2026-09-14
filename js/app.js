@@ -160,11 +160,11 @@ function teamSide(g, ab, w){
       <div class="row">
         <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
         <div><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+        <span class="tm-go" aria-hidden="true">&rsaquo;</span>
       </div>
       <div class="mini"><span class="pill"><b>${t.rec}</b>2025</span><span class="pill"><b>${t.rank}</b>rank</span></div>
     </div>
     ${rankPanel(g, ab, w)}
-    <div class="tm-more">Full breakdown<span aria-hidden="true">&rsaquo;</span></div>
   </div>`;
 }
 
@@ -309,26 +309,24 @@ function streakOf(ab){
 function rankPanel(g, ab, w){
   const opp = T[g.home===ab ? g.away : g.home];
   const me = rk(ab, w), them = rk(opp.ab, w);
-  const row = (lab, a, b) => {
+  const cell = (lab, a, b) => {
     const cls = a.rank < b.rank ? "better" : a.rank > b.rank ? "worse" : "";
     const val = a.val != null ? `<span class="rv">${a.val}</span>` : "";
-    return `<div class="nm">${lab}</div><div class="rvcell">${val}</div>
-      <div class="v ${cls}">${ORD(a.rank)}</div>`;
+    return `<div class="rc"><span class="nm">${lab}</span>${val}<span class="v ${cls}">${ORD(a.rank)}</span></div>`;
   };
   return `<div class="panel rank">
-    <h5>${ICON.rank}Team rankings</h5>
-    <div class="rk">
-      <div class="hd l"></div><div class="hd"></div><div class="hd">rank of 32</div>
-      ${row("Overall", me.overall, them.overall)}
-      ${row("Offense", me.offense, them.offense)}
-      ${row("Defense", me.defense, them.defense)}
-      ${row("Points per game", me.ppg, them.ppg)}
-      ${row("Turnover margin", me.turnover, them.turnover)}
+    <h5>${ICON.rank}Team rankings<span class="of">of 32</span></h5>
+    <div class="rk2">
+      ${cell("Overall", me.overall, them.overall)}
+      ${cell("Offense", me.offense, them.offense)}
+      ${cell("Defense", me.defense, them.defense)}
+      ${cell("Pts per game", me.ppg, them.ppg)}
+      ${cell("TO margin", me.turnover, them.turnover)}
     </div>
   </div>`;
 }
 
-/* ============================ shared card ============================ */
+/* ============================ shared card/* ============================ shared card ============================ */
 function teamCard(t, sub, sections, mini, extra){
   const search = esc([t.name,t.ab,t.div,sub,sections.map(s=>s.t+" "+s.items.join(" ")).join(" "), extra||""].join(" "));
   return `<article class="card" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}">
