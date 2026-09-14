@@ -1,6 +1,4 @@
-/* Runtime list of weeks. Week 1 is baked in; weeks.json is merged on top at load.
-   The page shows one week at a time: the newest one loaded. */
-const WEEKS = [WEEK1];
+/* The page shows one week at a time: the last entry in WEEKS (data/weeks.js). */
 
 /* ============================ helpers ============================ */
 const T = {}; TEAMS.forEach(t => T[t.ab] = t);
@@ -51,7 +49,7 @@ function rk(ab, w){
 }
 
 /* ============================ state ============================ */
-let ACTIVE = "wk1";
+let ACTIVE = WEEKS[WEEKS.length-1].id;
 function currentWeek(){ return WEEKS.find(x=>x.id===ACTIVE) || WEEKS[WEEKS.length-1]; }
 function show(id){ ACTIVE = id; render(); }
 function render(){
@@ -59,7 +57,6 @@ function render(){
   const bw = document.getElementById("barweek");
   if (bw) bw.innerHTML = `<b>${w.label}</b><span>${w.dates}</span>`;
   document.getElementById("view").innerHTML = renderWeek(w);
-  wireTools();
 }
 
 /* ============================ the page: one week, the slate ============================ */
@@ -91,12 +88,12 @@ function renderWeek(w){
     </div>
   </section>
 
-  ${TOOLS(w)}
   ${FOOTER}`;
 }
 
 /* ============================ game overlay ============================ */
-/* Everything about one matchup: how it sets up, both teams in full, keys, then the stat breakdown. */
+/* Everything about one matchup: how it sets up, both teams in full, keys, then the stat breakdown.
+   The two team blocks share one grid so matching sections sit on the same row and have equal height. */
 function openGame(key){
   const w = currentWeek(); if(!w) return;
   const g = (w.games||[]).find(x=>x.away+"-"+x.home===key); if(!g) return;
@@ -107,22 +104,24 @@ function openGame(key){
   const sec = (label, tone, items, sub) => (!items || !items.length) ? "" :
     `<div class="ovsec ${tone}">${label}${sub?`<span class="ovsub">${sub}</span>`:""}</div><ul class="ovkeys">${li(items)}</ul>`;
 
-  const teamBlock = ab => {
+  const teamBlock = (ab, col) => {
     const t = T[ab], e = (w.teams||{})[ab] || {};
     const home = g.home===ab;
-    const block = (label, tone, items) => (!items || !items.length) ? "" :
-      `<div class="tbsec ${tone}"><h5>${label}</h5><ul>${li(items)}</ul></div>`;
-    return `<div class="tb" style="--tc:${t.color}">
-      <div class="tbhd">
+    const headline = e.headline || (home ? "Home" : "Away");
+    const block = (row, label, tone, items) => (!items || !items.length)
+      ? `<div class="tbsec empty ${row}"></div>`
+      : `<div class="tbsec ${tone} ${row}"><h5>${label}</h5><ul>${li(items)}</ul></div>`;
+    const nothing = !(e.matchup||[]).length && !(e.strengths||[]).length && !(e.weaknesses||[]).length;
+    return `<div class="tb ${col}" style="--tc:${t.color}">
+      <div class="tbhd r1">
         <div class="badge" style="background:${t.color};color:${txt(t.color)}">${t.ab}</div>
-        <div class="who"><h4>${t.name}</h4><div class="sub">${e.headline || (home ? "Home" : "Away")}</div></div>
+        <div class="who"><h4>${t.name}</h4><div class="sub" title="${esc(headline)}">${headline}</div></div>
         <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${t.rec}</b>2025</span></div>
       </div>
-      ${block("Matchup preview", "n", e.matchup)}
-      ${block("Positives", "up", e.strengths)}
-      ${block("Negatives", "down", e.weaknesses)}
-      ${block("Where they stand", "n", e.last)}
-      ${!(e.matchup||[]).length && !(e.strengths||[]).length && !(e.weaknesses||[]).length ? `<div class="pending" style="padding:10px 0">Nothing loaded for this team yet.</div>` : ""}
+      ${block("r2", "Matchup preview", "n", e.matchup)}
+      ${block("r3", "Positives", "up", nothing ? ["Nothing loaded for this team yet."] : e.strengths)}
+      ${block("r4", "Negatives", "down", e.weaknesses)}
+      ${block("r5", "Where they stand", "n", e.last)}
     </div>`;
   };
 
@@ -176,7 +175,7 @@ function openGame(key){
     <div class="ovbody game">
       ${g.note ? `<p class="ovnote">${g.note}</p>` : ""}
       ${sec("How the game sets up", "n", g.preview)}
-      <div class="duo2">${teamBlock(g.away)}${teamBlock(g.home)}</div>
+      <div class="duo2">${teamBlock(g.away, "c1")}${teamBlock(g.home, "c2")}</div>
       ${sec("Keys to victory", "info", g.keys)}
       <div class="ovsec n">Full stat breakdown<span class="ovsub">green marks the better number</span></div>
       <div class="ovlegend">
@@ -198,195 +197,6 @@ function closeOv(){
   document.body.style.overflow = "";
 }
 
-/* ============================ data tools ============================ */
-
-
-function TOOLS(w){
-  return `<details class="tools" id="tools">
-    <summary>Data tools</summary>
-    <div class="tools-body">
-      <p>Three things live here. Pull the stat request to hand to Claude, load a finished week back in, or export what you already have.</p>
-      <div class="btnrow">
-        <button class="btn" id="btn-req">Copy stat request for the next week</button>
-        <button class="btn ghost" id="btn-tmpl">Download blank week template</button>
-        <button class="btn ghost" id="btn-exp">Export weeks.json for the site</button>
-      </div>
-      <textarea id="io" spellcheck="false" placeholder="Paste a finished week's JSON here, then press Load week."></textarea>
-      <div class="btnrow">
-        <button class="btn" id="btn-load">Load week from JSON</button>
-        <button class="btn ghost" id="btn-clear">Clear box</button>
-      </div>
-      <div class="status" id="status"></div>
-      <p class="hint">A loaded week lives in this browser tab only. To publish it, export weeks.json and commit it next to index.html. The page always shows the newest week it has.</p>
-    </div>
-  </details>`;
-}
-
-function nextWeekNum(){
-  return Math.max(0, ...WEEKS.filter(w=>w.status!=="sample").map(w=>parseInt((w.id.match(/\d+/)||[0])[0],10)||0)) + 1;
-}
-function statRequest(w){
-  const nextNum = nextWeekNum();
-  return `Build the Week ${nextNum} recap for my 2026 NFL tracker.
-
-Pull from reputable sources (Pro Football Reference box scores, ESPN, NFL.com, team sites, Sharp Football, PFF where public) and give me back ONE JSON object matching the schema below. No prose outside the JSON.
-
-Structure. Each GAME gets a shared matchup block that applies to both teams. Each TEAM gets its own panels.
-
-For every GAME:
-  line      - the closing spread and total, e.g. "KC -2.5, O/U 43.5"
-  note      - one line on what the game is
-  preview   - 3 or 4 bullets. This is the centerpiece, so make it about THIS matchup, not team history:
-                the key individual or unit matchups, which way momentum is running, and the winning factor.
-                Lead with where the beat writers and analysts agree. If they split, say so in one bullet.
-  keys      - 3 to 5 deeper bullets shown when the reader expands the breakdown. Injuries that swing the
-                game, scheme wrinkles, head to head history with the numbers, situational splits.
-  rows      - optional extra stat comparison rows, each {label, a, h, hi, note} where "a" is the away value,
-                "h" is the home value, hi is "a" when higher is better or "lo" when lower is better, and note
-                is a short qualifier like "2026" or "per game". Use these for turnover differential, third
-                down rate, red zone TD rate, yards per play, sacks, and key player numbers. Six team rows
-                (points for and against, differential, SRS, win total, analyst rank) are added automatically,
-                so do not repeat those.
-
-For every one of the 32 TEAMS:
-  last        - 2 or 3 bullets on their most recent game: score, record, how it flowed, hard numbers.
-                Empty array if they have not played yet.
-  matchup     - 3 bullets on this game from this team's angle: the line and what the panel expects, the one
-                matchup that decides it for them, and what is working against them.
-  strengths   - 4 or 5 bullets, shown as Positives. What this team does well and how it applies against THIS
-                opponent: name the players and units on both sides, with numbers. Returning injuries, scheme
-                edges, and who has to step up all belong here.
-  weaknesses  - 4 or 5 bullets, shown as Negatives. Where it breaks down against THIS opponent, who is out,
-                and what beat writers flag as the concern, with numbers.
-                Start every strengths and weaknesses bullet with one short bold sentence under 90 characters.
-                The card shows only that first sentence. The full bullet appears when a reader opens the team.
-  ranks       - five ranks, each {rank, prev}, out of 32 with no ties. 1 is always best.
-                  overall  - your read of the team right now, blending record, point differential, and how
-                             they have actually played.
-                  offense  - season to date scoring and efficiency.
-                  defense  - same on the other side of the ball.
-                  ppg      - points per game, season to date. Include "val" with the number itself.
-                  turnover - turnover margin, season to date. Include "val" as a signed string like "+4".
-                "prev" is that team's rank in the previous week's file.
-
-Rules I want followed:
-  - No em dashes and no double dashes anywhere in the text.
-  - Bullets, not paragraphs. Every claim that is a number should carry the number.
-  - Bold key names with <strong> tags.
-  - Every game needs a "kick" field: the kickoff as a UTC ISO timestamp, so the page can show it in each
-    reader's own time zone. Eastern is UTC-4 through early November, UTC-5 after. A 1:00 PM ET Sunday
-    kickoff on Sep 20 is "2026-09-20T17:00:00Z". Keep "day" and "time" too as an Eastern fallback.
-  - If something is genuinely unknown, use an empty array rather than guessing.
-
-Schema:
-{
-  "id": "wk${nextNum}",
-  "label": "Week ${nextNum}",
-  "type": "recap",
-  "status": "live",
-  "dates": "Month D to Month D, 2026",
-  "headline": "one short line",
-  "intro": "two or three sentences on the week as a whole",
-  "games": [
-    { "away":"NE", "home":"SEA", "day":"Sun Sep 20", "time":"1:00 PM ET",
-      "kick":"2026-09-20T17:00:00Z", "tv":"CBS", "venue":"Stadium, City",
-      "line":"SEA -3.5, O/U 44.5", "note":"one line on the game",
-      "awayScore":17, "homeScore":24,
-      "preview":["key matchup","momentum","winning factor"],
-      "keys":["deeper point","deeper point"],
-      "rows":[ {"label":"Turnover differential","a":"+2","h":"-1","hi":"a","note":"2026"} ]
-    }
-  ],
-  "teams": {
-    "SEA": {
-      "headline": "one short line for the card header",
-      "matchup": ["this game from this team's angle"],
-      "last": ["what happened, with numbers"],
-      "strengths": ["what they do well and who steps up"],
-      "weaknesses": ["where it breaks down, injuries included"],
-      "ranks": {
-        "overall": { "rank": 3, "prev": 3 },
-        "offense": { "rank": 6, "prev": 2 },
-        "defense": { "rank": 1, "prev": 1 },
-        "ppg":      { "rank": 4, "prev": 5, "val": 27.5 },
-        "turnover": { "rank": 3, "prev": 3, "val": "+4" }
-      }
-    }
-  }
-}
-
-Team keys, all 32: ${TEAMS.map(t=>t.ab).join(", ")}`;
-}
-
-function blankTemplate(){
-  const nextNum = nextWeekNum();
-  return {
-    id:"wk"+nextNum, label:"Week "+nextNum, type:"recap", status:"live",
-    dates:"", headline:"", intro:"", games:[],
-    teams: Object.fromEntries(TEAMS.map(t=>[t.ab,{
-      headline:"", matchup:[], last:[], strengths:[], weaknesses:[],
-      ranks:{overall:{rank:null,prev:null}, offense:{rank:null,prev:null}, defense:{rank:null,prev:null}, ppg:{rank:null,prev:null,val:null}, turnover:{rank:null,prev:null,val:null}}
-    }]))
-  };
-}
-
-function download(name, text){
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
-  a.download = name; document.body.appendChild(a); a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 400);
-}
-function say(msg, bad){
-  const s = document.getElementById("status"); if(!s) return;
-  s.textContent = msg; s.classList.toggle("err", !!bad);
-}
-function toClipboard(text){
-  const box = document.getElementById("io");
-  box.value = text; box.focus(); box.select();
-  let ok = false;
-  try { ok = document.execCommand("copy"); } catch(e){}
-  const done = () => say("Copied. Paste it into Claude.");
-  const fail = () => say(ok ? "Copied. Paste it into Claude." : "Could not reach the clipboard. The text is selected in the box, copy it manually.", !ok);
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fail);
-  else fail();
-}
-function wireTools(){
-  const t = document.getElementById("tools"); if(!t) return;
-  const w = currentWeek();
-  document.getElementById("btn-req").addEventListener("click", ()=>toClipboard(statRequest(w)));
-  document.getElementById("btn-tmpl").addEventListener("click", ()=>{
-    download("nfl-2026-week-template.json", JSON.stringify(blankTemplate(), null, 2)); say("Template downloaded.");
-  });
-  document.getElementById("btn-exp").addEventListener("click", ()=>{
-    download("weeks.json", JSON.stringify(WEEKS.filter(x=>x.id!=="wk1"), null, 2));
-    say("weeks.json downloaded. Upload it next to index.html to publish these weeks.");
-  });
-  document.getElementById("btn-clear").addEventListener("click", ()=>{ document.getElementById("io").value=""; say(""); });
-  document.getElementById("btn-load").addEventListener("click", ()=>{
-    const raw = document.getElementById("io").value.trim();
-    if (!raw) return say("Nothing in the box.", true);
-    let data;
-    try { data = JSON.parse(raw); } catch(e){ return say("That is not valid JSON. " + e.message, true); }
-    const list = Array.isArray(data) ? data : [data];
-    const bad = list.find(d => !d || !d.id || !d.label || !d.teams);
-    if (bad) return say("A week is missing id, label, or teams.", true);
-    let added = 0;
-    list.forEach(d=>{
-      d.games = d.games || []; d.status = d.status || "live"; d.type = d.type || "recap";
-      d.dates = d.dates || ""; d.headline = d.headline || ""; d.intro = d.intro || "";
-      const i = WEEKS.findIndex(x=>x.id===d.id);
-      if (i >= 0) WEEKS[i] = d; else { WEEKS.push(d); added++; }
-    });
-    WEEKS.sort((a,b)=>{
-      const n = x => x.status==="sample" ? 999 : (parseInt((x.id.match(/\d+/)||[0])[0],10)||0);
-      return n(a)-n(b);
-    });
-    show(list[0].id);
-    say((added?added+" week added. ":"Week replaced. ") + "Now showing it.");
-    document.getElementById("tools").open = true;
-  });
-}
-
 /* ============================ footer ============================ */
 const FOOTER = `<footer>
   <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 13, 2026. New week posted each Tuesday.</p>
@@ -402,36 +212,4 @@ document.getElementById("view").addEventListener("click", e=>{
 document.getElementById("ov").addEventListener("click", e=>{ if (e.target.id==="ov") closeOv(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeOv(); });
 document.getElementById("top").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-function latestWeekId(){
-  const nums = WEEKS.map(w => parseInt((w.id.match(/\d+/)||[0])[0],10)||0);
-  return WEEKS[nums.indexOf(Math.max(...nums))].id;
-}
-function mergeWeeks(list){
-  let added = 0;
-  list.forEach(d=>{
-    if (!d || !d.id || !d.teams) return;
-    d.games = d.games || []; d.status = d.status || "live"; d.type = d.type || "recap";
-    d.label = d.label || ("Week " + ((d.id.match(/\d+/)||["?"])[0]));
-    d.dates = d.dates || ""; d.headline = d.headline || ""; d.intro = d.intro || "";
-    const i = WEEKS.findIndex(x=>x.id===d.id);
-    if (i >= 0) WEEKS[i] = d; else { WEEKS.push(d); added++; }
-  });
-  WEEKS.sort((a,b)=>((parseInt((a.id.match(/\d+/)||[0])[0],10)||0)-(parseInt((b.id.match(/\d+/)||[0])[0],10)||0)));
-  return added;
-}
-show(latestWeekId());
-
-/* When published, any weeks.json sitting next to this file is loaded and merged.
-   Opening the file locally just skips this and uses the weeks baked in above. */
-(function loadHosted(){
-  if (!window.fetch || !/^https?:$/.test(location.protocol)) return;
-  fetch("weeks.json", {cache:"no-store"})
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      if (!data) return;
-      const list = Array.isArray(data) ? data : [data];
-      if (!mergeWeeks(list)) return;
-      show(latestWeekId());
-    })
-    .catch(()=>{});
-})();
+render();

@@ -40,15 +40,17 @@ dom.window.addEventListener('load', () => {
   const ov = d.getElementById('ov');
 
   check('no script errors', errs.length === 0, errs.join(' | ') || 'none');
-  check('shows Week 1', g('ACTIVE') === 'wk1' && d.getElementById('barweek').textContent.includes('Week 1'), d.getElementById('barweek').textContent);
+  check('shows the last week in data/weeks.js', g('ACTIVE') === g('WEEKS[WEEKS.length-1].id') && d.getElementById('barweek').textContent.includes(g('currentWeek().label')), d.getElementById('barweek').textContent);
   check('16 game tiles', n('.slot') === 16, n('.slot'));
-  check('no week tabs, search, or team cards on the page', n('.wtab') === 0 && !d.getElementById('q') && n('.card') === 0);
+  check('no tabs, search, cards, or data tools on the page', n('.wtab') === 0 && !d.getElementById('q') && n('.card') === 0 && !d.getElementById('tools'));
   check('played games show a score', n('.slot .score') === 2, n('.slot .score'));
 
   click('.slot[data-game="NE-SEA"]');
   const title = d.getElementById('ovtitle') ? d.getElementById('ovtitle').textContent : '';
   check('game overlay opens', ov.classList.contains('on') && title.includes('New England Patriots') && title.includes('Seattle Seahawks'), title);
-  check('both teams in the overlay', n('.ovbody .tb') === 2 && n('.ovbody .tbsec.up') === 2 && n('.ovbody .tbsec.down') === 2);
+  check('both teams on one shared grid', n('.duo2 .tb.c1') === 1 && n('.duo2 .tb.c2') === 1 && n('.duo2 .r1') === 2 && n('.duo2 .r3.up') === 2 && n('.duo2 .r4.down') === 2);
+  check('every row present for both teams', ['r1','r2','r3','r4','r5'].every(r => n('.duo2 .' + r) === 2));
+  check('headlines carry a title for the one-line clamp', n('.tbhd .sub[title]') === 2);
   check('setup and keys sections present', [...d.querySelectorAll('.ovbody .ovsec')].map(e => e.textContent).join('|').includes('How the game sets up') && n('.ovbody .ovkeys li') >= 6, n('.ovbody .ovkeys li') + ' bullets');
   check('stat breakdown at the bottom', n('.ovbody .sbar') >= 12, n('.ovbody .sbar') + ' bars');
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -59,12 +61,11 @@ dom.window.addEventListener('load', () => {
   click('#ovx');
   check('X closes overlay', !ov.classList.contains('on'));
 
-  const wk = w.blankTemplate(); wk.id = 'wk99'; wk.label = 'Week 99'; wk.headline = 'Synthetic'; wk.intro = 'Round trip';
-  wk.games = [{ away: 'DET', home: 'BUF', day: 'Thu', time: '8:15 PM ET', kick: '2026-09-18T00:15:00Z', tv: 'Prime Video', venue: 'Highmark Stadium', awayScore: 20, homeScore: 24 }];
-  d.getElementById('io').value = JSON.stringify(wk); click('#btn-load');
-  check('JSON load shows the new week', g('ACTIVE') === 'wk99' && g('WEEKS.length') === 2 && n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'), d.getElementById('status').textContent);
+  // a week with no writeups still renders: numbers only, placeholder in Positives
+  w.eval('WEEKS.push({id:"wk99", label:"Week 99", type:"recap", status:"live", dates:"", headline:"Synthetic", intro:"", games:[{away:"DET",home:"BUF",day:"Thu",time:"8:15 PM ET",kick:"2026-09-18T00:15:00Z",tv:"Prime Video",venue:"Highmark Stadium",awayScore:20,homeScore:24}], teams:{}}); show("wk99");');
+  check('a later week takes over the page', n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'));
   click('.slot');
-  check('overlay works for a loaded week with no writeups', ov.classList.contains('on') && n('.ovbody .pending') === 2 && n('.ovbody .sbar') >= 12);
+  check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 6 && n('.ovbody .sbar') >= 12, n('.duo2 .tbsec.empty') + ' empty rows');
   check('no errors after interactions', errs.length === 0, errs.join(' | ') || 'none');
 
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
