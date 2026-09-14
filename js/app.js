@@ -92,8 +92,9 @@ function renderWeek(w){
 }
 
 /* ============================ game overlay ============================ */
-/* Everything about one matchup: how it sets up, both teams in full, keys, then the stat breakdown.
-   The two team blocks share one grid so matching sections sit on the same row and have equal height. */
+/* Everything about one matchup: how it sets up, both teams in full, keys to victory, then the stat breakdown.
+   The two team blocks share one grid so matching sections sit on the same row and have equal height;
+   the keys block spans both columns on the last row. */
 function openGame(key){
   const w = currentWeek(); if(!w) return;
   const g = (w.games||[]).find(x=>x.away+"-"+x.home===key); if(!g) return;
@@ -121,7 +122,6 @@ function openGame(key){
       ${block("r2", "Matchup preview", "n", e.matchup)}
       ${block("r3", "Positives", "up", nothing ? ["Nothing loaded for this team yet."] : e.strengths)}
       ${block("r4", "Negatives", "down", e.weaknesses)}
-      ${block("r5", "Where they stand", "n", e.last)}
     </div>`;
   };
 
@@ -175,8 +175,9 @@ function openGame(key){
     <div class="ovbody game">
       ${g.note ? `<p class="ovnote">${g.note}</p>` : ""}
       ${sec("How the game sets up", "n", g.preview)}
-      <div class="duo2">${teamBlock(g.away, "c1")}${teamBlock(g.home, "c2")}</div>
-      ${sec("Keys to victory", "info", g.keys)}
+      <div class="duo2">${teamBlock(g.away, "c1")}${teamBlock(g.home, "c2")}
+        ${(g.keys||[]).length ? `<div class="tbsec info r5 span"><h5>Keys to victory</h5><ul>${li(g.keys)}</ul></div>` : ""}
+      </div>
       <div class="ovsec n">Full stat breakdown<span class="ovsub">green marks the better number</span></div>
       <div class="ovlegend">
         <span><i style="background:${a.color}"></i>${a.name}</span>

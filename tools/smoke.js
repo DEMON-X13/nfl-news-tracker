@@ -49,9 +49,10 @@ dom.window.addEventListener('load', () => {
   const title = d.getElementById('ovtitle') ? d.getElementById('ovtitle').textContent : '';
   check('game overlay opens', ov.classList.contains('on') && title.includes('New England Patriots') && title.includes('Seattle Seahawks'), title);
   check('both teams on one shared grid', n('.duo2 .tb.c1') === 1 && n('.duo2 .tb.c2') === 1 && n('.duo2 .r1') === 2 && n('.duo2 .r3.up') === 2 && n('.duo2 .r4.down') === 2);
-  check('every row present for both teams', ['r1','r2','r3','r4','r5'].every(r => n('.duo2 .' + r) === 2));
+  check('every row present for both teams', ['r1','r2','r3','r4'].every(r => n('.duo2 .' + r) === 2) && n('.duo2 .tb .r5') === 0 && n('.tbsec.n h5') === 2);
+  check('keys to victory is a blue block spanning both columns', n('.duo2 .tbsec.info.span.r5') === 1 && n('.duo2 .tbsec.info li') >= 3, n('.duo2 .tbsec.info li') + ' keys');
   check('headlines carry a title for the one-line clamp', n('.tbhd .sub[title]') === 2);
-  check('setup and keys sections present', [...d.querySelectorAll('.ovbody .ovsec')].map(e => e.textContent).join('|').includes('How the game sets up') && n('.ovbody .ovkeys li') >= 6, n('.ovbody .ovkeys li') + ' bullets');
+  check('setup and keys sections present', [...d.querySelectorAll('.ovbody .ovsec')].map(e => e.textContent).join('|').includes('How the game sets up') && n('.ovbody .ovkeys li') >= 3, n('.ovbody .ovkeys li') + ' bullets');
   check('stat breakdown at the bottom', n('.ovbody .sbar') >= 12, n('.ovbody .sbar') + ' bars');
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes overlay', !ov.classList.contains('on'));
@@ -65,7 +66,7 @@ dom.window.addEventListener('load', () => {
   w.eval('WEEKS.push({id:"wk99", label:"Week 99", type:"recap", status:"live", dates:"", headline:"Synthetic", intro:"", games:[{away:"DET",home:"BUF",day:"Thu",time:"8:15 PM ET",kick:"2026-09-18T00:15:00Z",tv:"Prime Video",venue:"Highmark Stadium",awayScore:20,homeScore:24}], teams:{}}); show("wk99");');
   check('a later week takes over the page', n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'));
   click('.slot');
-  check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 6 && n('.ovbody .sbar') >= 12, n('.duo2 .tbsec.empty') + ' empty rows');
+  check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 4 && n('.ovbody .sbar') >= 12, n('.duo2 .tbsec.empty') + ' empty rows');
   check('no errors after interactions', errs.length === 0, errs.join(' | ') || 'none');
 
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
