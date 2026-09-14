@@ -204,7 +204,7 @@ function closeOv(){
 
 /* ============================ footer ============================ */
 const FOOTER = `<footer>
-  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 13, 2026. New week posted each Tuesday.</p>
+  <p style="font-weight:600;color:var(--ink-2);margin-bottom:14px">Last updated September 13, 2026. New week posted each Wednesday.</p>
 </footer>`;
 
 /* ============================ boot ============================ */

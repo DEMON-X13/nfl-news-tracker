@@ -1,6 +1,6 @@
 # Weekly research request
 
-Hand this to Claude (Claude Code or the app) on Tuesday, replacing N with the week number.
+Hand this to Claude (Claude Code or the app) on Wednesday, replacing N with the week number.
 It returns one JSON object. Save it as `data/weekN.js` in the form `const WEEKN = {...};`,
 add the week to `data/weeks.js`, add a script tag to `index.html`, run `node tools/smoke.js`,
 commit, push. Full steps are in HANDOFF.md under Weekly workflow.
