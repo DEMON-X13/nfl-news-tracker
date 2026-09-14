@@ -169,7 +169,7 @@ function teamSide(g, ab, w){
   const search = esc([t.name, t.ab, t.div, sub, detail].join(" "));
   const box = (label, tone, items) => `<div class="panel ${tone}">
         <h5>${ICON[tone]}${label}</h5>
-        ${items && items.length ? `<ul>${items.map(x=>`<li>${snap(x)}</li>`).join("")}</ul>` : `<div class="pending">Nothing loaded yet.</div>`}
+        ${items && items.length ? `<ul>${items.map(x=>`<li>${snap(x, 92)}</li>`).join("")}</ul>` : `<div class="pending">Nothing loaded yet.</div>`}
       </div>`;
   return `<div class="tm" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}"
       data-team="${ab}" data-game="${g.away}-${g.home}" role="button" tabindex="0" aria-label="Open the ${t.name} breakdown">
