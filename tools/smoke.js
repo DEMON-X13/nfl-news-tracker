@@ -52,13 +52,15 @@ dom.window.addEventListener('load', () => {
   check('every row present for both teams', ['r1','r2','r3','r4','r5'].every(r => n('.duo2 .' + r) === 2) && n('.tbsec.n h5') === 2);
   check('keys to victory is a blue block per team', n('.duo2 .tb .tbsec.info.r5') === 2 && n('.duo2 .tbsec.info li') === 6, n('.duo2 .tbsec.info li') + ' keys');
   check('headlines carry a title for the one-line clamp', n('.tbhd .sub[title]') === 2);
-  check('setup and keys sections present', [...d.querySelectorAll('.ovbody .ovsec')].map(e => e.textContent).join('|').includes('How the game sets up') && n('.ovbody .ovkeys li') >= 3, n('.ovbody .ovkeys li') + ' bullets');
+  check('no setup section', ![...d.querySelectorAll('.ovbody .ovsec')].some(e => e.textContent.includes('How the game sets up')));
+  check('record chips show the 2026 record', [...d.querySelectorAll('.tbhd .chips .pill:not(.big) b')].map(b => b.textContent).join(' ') === '0-1 1-0' && d.querySelector('.tbhd .chips .pill:not(.big)').textContent.includes('2026'), [...d.querySelectorAll('.tbhd .chips .pill:not(.big)')].map(p => p.textContent).join(' | '));
   check('stat breakdown at the bottom', n('.ovbody .sbar') >= 12, n('.ovbody .sbar') + ' bars');
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes overlay', !ov.classList.contains('on'));
 
   click('.slot[data-game="DEN-KC"]');
   check('a second game opens', ov.classList.contains('on') && d.getElementById('ovtitle').textContent.includes('Kansas City Chiefs'));
+  check('unplayed teams are 0-0', [...d.querySelectorAll('.tbhd .chips .pill:not(.big) b')].map(b => b.textContent).join(' ') === '0-0 0-0');
   click('#ovx');
   check('X closes overlay', !ov.classList.contains('on'));
 

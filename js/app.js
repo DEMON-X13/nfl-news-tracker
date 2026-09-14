@@ -48,6 +48,18 @@ function rk(ab, w){
   };
 }
 
+/* 2026 record from every played game in WEEKS. 0-0 until a team has a result. */
+function record(ab){
+  let w = 0, l = 0, t = 0;
+  WEEKS.forEach(wk => (wk.games||[]).forEach(g => {
+    if (g.awayScore == null || g.homeScore == null) return;
+    if (g.away !== ab && g.home !== ab) return;
+    const home = g.home === ab, mine = home ? g.homeScore : g.awayScore, theirs = home ? g.awayScore : g.homeScore;
+    if (mine > theirs) w++; else if (mine < theirs) l++; else t++;
+  }));
+  return w + "-" + l + (t ? "-" + t : "");
+}
+
 /* ============================ state ============================ */
 let ACTIVE = WEEKS[WEEKS.length-1].id;
 function currentWeek(){ return WEEKS.find(x=>x.id===ACTIVE) || WEEKS[WEEKS.length-1]; }
@@ -92,7 +104,7 @@ function renderWeek(w){
 }
 
 /* ============================ game overlay ============================ */
-/* Everything about one matchup: how it sets up, both teams in full, keys to victory, then the stat breakdown.
+/* Everything about one matchup: both teams in full with keys to victory, then the stat breakdown.
    The two team blocks share one grid so matching sections sit on the same row and have equal height. */
 function openGame(key){
   const w = currentWeek(); if(!w) return;
@@ -100,9 +112,6 @@ function openGame(key){
   const a = T[g.away], hm = T[g.home], k = kickOf(g);
   const done = g.awayScore!=null && g.homeScore!=null;
   const meta = [done ? `Final ${g.awayScore}-${g.homeScore}` : "", k.day, done ? "" : k.time, g.tv, g.venue, g.line||""].filter(Boolean).join(" &middot; ");
-
-  const sec = (label, tone, items, sub) => (!items || !items.length) ? "" :
-    `<div class="ovsec ${tone}">${label}${sub?`<span class="ovsub">${sub}</span>`:""}</div><ul class="ovkeys">${li(items)}</ul>`;
 
   const teamBlock = (ab, col) => {
     const t = T[ab], e = (w.teams||{})[ab] || {};
@@ -116,7 +125,7 @@ function openGame(key){
       <div class="tbhd r1">
         <div class="badge" style="background:${t.color};color:${txt(t.color)}">${t.ab}</div>
         <div class="who"><h4>${t.name}</h4><div class="sub" title="${esc(headline)}">${headline}</div></div>
-        <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${t.rec}</b>2025</span></div>
+        <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${record(ab)}</b>2026</span></div>
       </div>
       ${block("r2", "Matchup preview", "n", e.matchup)}
       ${block("r3", "Positives", "up", nothing ? ["Nothing loaded for this team yet."] : e.strengths)}
@@ -174,7 +183,6 @@ function openGame(key){
     </div>
     <div class="ovbody game">
       ${g.note ? `<p class="ovnote">${g.note}</p>` : ""}
-      ${sec("How the game sets up", "n", g.preview)}
       <div class="duo2">${teamBlock(g.away, "c1")}${teamBlock(g.home, "c2")}</div>
       <div class="ovsec n">Full stat breakdown<span class="ovsub">green marks the better number</span></div>
       <div class="ovlegend">
