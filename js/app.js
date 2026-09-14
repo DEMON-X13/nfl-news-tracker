@@ -129,7 +129,7 @@ function renderWeek(w){
     </div>
   </section>
 
-  ${w.games.map(g=>{
+  <div class="games">${w.games.map(g=>{
     const a=T[g.away], h=T[g.home];
     const sc = (g.awayScore!=null&&g.homeScore!=null) ? `Final ${g.awayScore}-${g.homeScore} &middot; ` : "";
     const k = kickOf(g);
@@ -142,7 +142,7 @@ function renderWeek(w){
       <button class="fsbtn" data-game="${g.away}-${g.home}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Full Stats Preview</button>
       <article class="card duo">${teamSide(g, g.away, w)}${teamSide(g, g.home, w)}</article>
     </section>`;
-  }).join("")}
+  }).join("")}</div>
 
   <p class="empty" id="empty">No team matches that search.</p>
   ${TOOLS(w)}

@@ -133,6 +133,27 @@ body.searching .nosearch{display:none!important}
 .tm:hover .tm-more{color:var(--ink)}
 .tm.hasCur{box-shadow:inset 0 0 0 2px #E8C25A}
 @media(max-width:760px){.card.duo{flex-direction:column}.tm+.tm{border-left:0;border-top:1px solid var(--line)}}
+/* ---------- game grid: two games per row on wide screens, tighter spacing ---------- */
+.games{display:grid;grid-template-columns:1fr;gap:26px 18px;margin-top:34px}
+@media(min-width:1100px){.games{grid-template-columns:1fr 1fr}}
+.games .game{margin-top:0;min-width:0}
+.games .game-head{margin-bottom:5px}
+.games .game-head h3{font-size:16.5px;gap:7px}
+.games .game-head h3 i{height:15px}
+.games .game-head .meta{font-size:11.5px}
+.games .game-note{font-size:13px;margin-bottom:9px}
+.games .fsbtn{margin-bottom:10px;padding:5px 10px;font-size:11.5px}
+.tm .card-top{padding:13px 15px 11px}
+.tm .card-top h4{font-size:15.5px}
+.tm .card-top .sub{font-size:12.5px;margin-top:5px;min-height:2.9em;line-height:1.45}
+.tm .mini{margin-top:8px}
+.tm .badge{width:32px;height:32px;flex:0 0 32px;font-size:10.5px;border-radius:8px}
+.tm .panel{padding:11px 15px 12px}
+.tm .panel h5{margin-bottom:7px}
+.tm .rk{gap:4px 8px}
+.tm .rk .nm{font-size:12px}
+.tm .rk .v{font-size:13px;min-width:34px;padding:2px 6px}
+.tm-more{padding:7px 15px 9px;font-size:11px}
 
 /* ---------- team card ---------- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
