@@ -9,7 +9,7 @@ const WEEK1 = {
   id:"wk1", label:"Week 1", type:"preview", status:"live",
   dates:"Wednesday, September 9 to Monday, September 14, 2026",
   headline:"All 32 teams open across four days",
-  intro:"Sixteen games, no byes, and a slate that runs Wednesday through Monday. Seattle and San Francisco are already 1-0. Each game below shows both teams side by side with their rankings. Click a team for its matchup preview, positives, negatives, and keys to victory. Full Stats Preview opens the number comparison.",
+  intro:"Sixteen games, no byes, and a slate that runs Wednesday through Monday. Seattle and San Francisco are already 1-0. Each game below shows both teams side by side with the short version of their positives and negatives. Click a team for the full breakdown: matchup preview, how the game sets up, the complete positives and negatives, keys to victory, and the numbers against the opponent.",
   ranksNote:"Ranks are the preseason consensus. Overall is the Sharp Football order, offense and defense are 2025 scoring ranks. They start moving once results accumulate.",
   games:[
   {

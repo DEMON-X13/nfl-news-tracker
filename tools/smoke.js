@@ -43,8 +43,8 @@ dom.window.addEventListener('load', () => {
   check('16 games', n('.game') === 16, n('.game'));
   check('16 combined game cards', n('.card.duo') === 16, n('.card.duo'));
   check('32 team sides', n('.tm') === 32, n('.tm'));
-  check('32 panels, rankings only', n('.panel') === 32, n('.panel'));
-  check('32 rank panels', n('.panel.rank') === 32, n('.panel.rank'));
+  check('64 snapshot panels, positives and negatives', n('.panel') === 64 && n('.snap .panel.up') === 32 && n('.snap .panel.down') === 32, n('.panel'));
+  check('rank shown in every title', n('.tm .pill.big') === 32, n('.tm .pill.big'));
   check('19 week tabs (guide + 18 weeks)', n('.wtab') === 19, n('.wtab'));
 
   click('.wtab[data-id="guide"]');
@@ -72,7 +72,7 @@ dom.window.addEventListener('load', () => {
   check('Escape closes overlay', !d.getElementById('ov').classList.contains('on'));
 
   click('.tm[data-team="SEA"]');
-  check('team overlay opens with four detail sections', d.getElementById('ov').classList.contains('on') && d.getElementById('ovtitle').textContent === 'Seattle Seahawks' && n('.ovbody .ovsec') === 4 && n('.ovbody .ovkeys li') >= 8, n('.ovbody .ovkeys li') + ' bullets');
+  check('team overlay opens with the full breakdown', d.getElementById('ov').classList.contains('on') && d.getElementById('ovtitle').textContent === 'Seattle Seahawks' && n('.ovbody .ovsec') >= 6 && n('.ovbody .ovkeys li') >= 14 && n('.ovbody .nrow') >= 7, n('.ovbody .ovkeys li') + ' bullets');
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes team overlay', !d.getElementById('ov').classList.contains('on'));
 

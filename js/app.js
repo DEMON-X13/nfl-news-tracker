@@ -148,23 +148,43 @@ function renderWeek(w){
   ${TOOLS(w)}
   ${FOOTER}`;
 }
+/* First sentence of a bullet, tags stripped, capped in length. The card shows this; the overlay shows the full bullet. */
+function snap(html, max){
+  const plain = String(html).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const m = plain.match(/^[\s\S]*?[.!?](?=\s+[A-Z"]|$)/);
+  let s = m ? m[0] : plain;
+  max = max || 110;
+  if (s.length > max){
+    const cut = s.lastIndexOf(" ", max - 1);
+    s = s.slice(0, cut > 40 ? cut : max - 1).replace(/[,;:]$/, "") + "…";
+  }
+  return s;
+}
+
 /* One team's half of the combined game card. Click it to open the full breakdown. */
 function teamSide(g, ab, w){
   const t = T[ab], entry = (w.teams||{})[ab] || {};
   const sub = entry.headline || "No writeup loaded yet.";
-  const detail = [entry.matchup||[], entry.strengths||[], entry.weaknesses||[], g.keys||[]].map(a=>a.join(" ")).join(" ");
+  const detail = [entry.matchup||[], entry.last||[], entry.strengths||[], entry.weaknesses||[], g.preview||[], g.keys||[]].map(a=>a.join(" ")).join(" ");
   const search = esc([t.name, t.ab, t.div, sub, detail].join(" "));
+  const box = (label, tone, items) => `<div class="panel ${tone}">
+        <h5>${ICON[tone]}${label}</h5>
+        ${items && items.length ? `<ul>${items.map(x=>`<li>${snap(x)}</li>`).join("")}</ul>` : `<div class="pending">Nothing loaded yet.</div>`}
+      </div>`;
   return `<div class="tm" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}"
       data-team="${ab}" data-game="${g.away}-${g.home}" role="button" tabindex="0" aria-label="Open the ${t.name} breakdown">
     <div class="card-top">
       <div class="row">
         <div class="badge" style="color:${txt(t.color)}">${t.ab}</div>
-        <div><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+        <div class="who"><h4>${t.name}</h4><div class="sub">${sub}</div></div>
+        <div class="chips"><span class="pill big"><b>${ORD(t.rank)}</b>rank</span><span class="pill"><b>${t.rec}</b>2025</span></div>
         <span class="tm-go" aria-hidden="true">&rsaquo;</span>
       </div>
-      <div class="mini"><span class="pill"><b>${t.rec}</b>2025</span><span class="pill"><b>${t.rank}</b>rank</span></div>
     </div>
-    ${rankPanel(g, ab, w)}
+    <div class="snap">
+      ${box("Positives", "up", entry.strengths)}
+      ${box("Negatives", "down", entry.weaknesses)}
+    </div>
   </div>`;
 }
 
@@ -305,28 +325,7 @@ function streakOf(ab){
        : {label:"Lost last out", cls:"cool", note:rec};
 }
 
-/* ============================ rankings panel ============================ */
-function rankPanel(g, ab, w){
-  const opp = T[g.home===ab ? g.away : g.home];
-  const me = rk(ab, w), them = rk(opp.ab, w);
-  const cell = (lab, a, b) => {
-    const cls = a.rank < b.rank ? "better" : a.rank > b.rank ? "worse" : "";
-    const val = a.val != null ? `<span class="rv">${a.val}</span>` : "";
-    return `<div class="rc"><span class="nm">${lab}</span>${val}<span class="v ${cls}">${ORD(a.rank)}</span></div>`;
-  };
-  return `<div class="panel rank">
-    <h5>${ICON.rank}Team rankings<span class="of">of 32</span></h5>
-    <div class="rk2">
-      ${cell("Overall", me.overall, them.overall)}
-      ${cell("Offense", me.offense, them.offense)}
-      ${cell("Defense", me.defense, them.defense)}
-      ${cell("Pts per game", me.ppg, them.ppg)}
-      ${cell("TO margin", me.turnover, them.turnover)}
-    </div>
-  </div>`;
-}
-
-/* ============================ shared card/* ============================ shared card ============================ */
+/* ============================ shared card ============================ */
 function teamCard(t, sub, sections, mini, extra){
   const search = esc([t.name,t.ab,t.div,sub,sections.map(s=>s.t+" "+s.items.join(" ")).join(" "), extra||""].join(" "));
   return `<article class="card" id="${slug(t.name)}-${ACTIVE}" style="--tc:${t.color}" data-conf="${t.conf}" data-search="${search}">
@@ -526,8 +525,15 @@ For every GAME:
 For every one of the 32 TEAMS:
   last        - 2 or 3 bullets on their most recent game: score, record, how it flowed, hard numbers.
                 Empty array if they have not played yet.
-  strengths   - 3 bullets on what this team does well as a unit, and name who has to step up inside it.
-  weaknesses  - 3 bullets on where it breaks down, including injuries and what sources flag as a concern.
+  matchup     - 3 bullets on this game from this team's angle: the line and what the panel expects, the one
+                matchup that decides it for them, and what is working against them.
+  strengths   - 4 or 5 bullets, shown as Positives. What this team does well and how it applies against THIS
+                opponent: name the players and units on both sides, with numbers. Returning injuries, scheme
+                edges, and who has to step up all belong here.
+  weaknesses  - 4 or 5 bullets, shown as Negatives. Where it breaks down against THIS opponent, who is out,
+                and what beat writers flag as the concern, with numbers.
+                Start every strengths and weaknesses bullet with one short bold sentence under 90 characters.
+                The card shows only that first sentence. The full bullet appears when a reader opens the team.
   ranks       - five ranks, each {rank, prev}, out of 32 with no ties. 1 is always best.
                   overall  - your read of the team right now, blending record, point differential, and how
                              they have actually played.
@@ -568,6 +574,7 @@ Schema:
   "teams": {
     "SEA": {
       "headline": "one short line for the card header",
+      "matchup": ["this game from this team's angle"],
       "last": ["what happened, with numbers"],
       "strengths": ["what they do well and who steps up"],
       "weaknesses": ["where it breaks down, injuries included"],
@@ -591,7 +598,7 @@ function blankTemplate(){
     id:"wk"+nextNum, label:"Week "+nextNum, type:"recap", status:"live",
     dates:"", headline:"", intro:"", games:[],
     teams: Object.fromEntries(TEAMS.map(t=>[t.ab,{
-      headline:"", last:[], strengths:[], weaknesses:[],
+      headline:"", matchup:[], last:[], strengths:[], weaknesses:[],
       ranks:{overall:{rank:null,prev:null}, offense:{rank:null,prev:null}, defense:{rank:null,prev:null}, ppg:{rank:null,prev:null,val:null}, turnover:{rank:null,prev:null,val:null}}
     }]))
   };
@@ -760,7 +767,7 @@ function openStats(key){
   document.body.style.overflow = "hidden";
   document.getElementById("ovx").addEventListener("click", closeStats);
 }
-/* team breakdown overlay: matchup preview, positives, negatives, keys to victory */
+/* team breakdown overlay: the full text behind the card, plus the game context and the numbers */
 function openTeam(ab, key){
   const w = WEEKS.find(x=>x.id===ACTIVE); if(!w) return;
   const games = w.games||[];
@@ -768,18 +775,55 @@ function openTeam(ab, key){
   const t = T[ab]; if(!t) return;
   const entry = (w.teams||{})[ab] || {};
   const ctx = [];
+  let opp = null, home = false;
   if (g){
-    const home = g.home===ab, opp = T[home?g.away:g.home], k = kickOf(g);
+    home = g.home===ab; opp = T[home?g.away:g.home];
+    const k = kickOf(g);
     if (g.awayScore!=null && g.homeScore!=null){
       const mine = home?g.homeScore:g.awayScore, theirs = home?g.awayScore:g.homeScore;
       const res = mine>theirs?"Won":mine<theirs?"Lost":"Tied";
       ctx.push(`${res} ${mine}-${theirs} ${home?"vs":"at"} ${opp.name}`);
     } else ctx.push(`${home?"vs":"at"} ${opp.name} &middot; ${k.day} &middot; ${k.time}`);
     if (g.tv) ctx.push(g.tv);
+    if (g.line) ctx.push(g.line);
   }
   ctx.push(`${t.rec} in 2025 &middot; Rank ${t.rank}`);
-  const sec = (label, tone, items) => `<div class="ovsec ${tone}">${label}</div>` +
-    (items && items.length ? `<ul class="ovkeys">${li(items)}</ul>` : `<div class="pending">Nothing loaded for this section yet.</div>`);
+  const sec = (label, tone, items, sub) => {
+    if (!items || !items.length) return "";
+    return `<div class="ovsec ${tone}">${label}${sub?`<span class="ovsub">${sub}</span>`:""}</div><ul class="ovkeys">${li(items)}</ul>`;
+  };
+  const numbers = () => {
+    if (!opp) return "";
+    const num = v => Math.round(v*10)/10;
+    const a = t, b = opp;
+    const rows = [
+      {label:"Points per game", a:num(a.pf/17), b:num(b.pf/17), hi:"hi", note:"2025"},
+      {label:"Points allowed", a:num(a.pa/17), b:num(b.pa/17), hi:"lo", note:"2025"},
+      {label:"Point differential", a:a.pd, b:b.pd, hi:"hi", note:"2025", sign:true},
+      {label:"SRS", a:num(a.srs), b:num(b.srs), hi:"hi", note:"2025", sign:true},
+      {label:"Turnover margin", a:a.to, b:b.to, hi:"hi", note:"2025", sign:true},
+      {label:"Posted win total", a:a.wt, b:b.wt, hi:"hi", note:"2026"},
+      {label:"Analyst rank", a:a.rank, b:b.rank, hi:"lo", note:"of 32"}
+    ].concat((g.rows||[]).map(r=>({label:r.label, a:home?r.h:r.a, b:home?r.a:r.h, hi:r.hi==="lo"?"lo":"hi", note:r.note})));
+    const cell = (v, o, hi, sign) => {
+      const x = parseFloat(v), y = parseFloat(o);
+      const win = !isNaN(x) && !isNaN(y) && x!==y && (hi==="lo" ? x<y : x>y);
+      const txtv = (sign && typeof v==="number" && v>0) ? "+"+v : v;
+      return `<b class="${win?"win":""}">${txtv}</b>`;
+    };
+    return `<div class="ovsec n">By the numbers<span class="ovsub">${a.ab} vs ${b.ab}</span></div>
+      <div class="nums">
+        ${rows.map(r=>`<div class="nrow"><span class="nl">${r.label}${r.note?`<small>${r.note}</small>`:""}</span>${cell(r.a,r.b,r.hi,r.sign)}${cell(r.b,r.a,r.hi,r.sign)}</div>`).join("")}
+      </div>`;
+  };
+  const body =
+    sec("Matchup preview", "n", entry.matchup) +
+    sec("How the game sets up", "n", g ? g.preview : [], "both teams") +
+    sec("Where they stand", "n", entry.last) +
+    sec("Positives", "up", entry.strengths) +
+    sec("Negatives", "down", entry.weaknesses) +
+    sec("Keys to victory", "info", g ? g.keys : [], "both teams") +
+    numbers();
   document.getElementById("ovbox").innerHTML = `
     <div class="ovhd">
       <div class="row">
@@ -791,12 +835,7 @@ function openTeam(ab, key){
       </div>
       <button class="x" id="ovx" aria-label="Close">&times;</button>
     </div>
-    <div class="ovbody team">
-      ${sec("Matchup preview", "n", entry.matchup)}
-      ${sec("Positives", "up", entry.strengths)}
-      ${sec("Negatives", "down", entry.weaknesses)}
-      ${sec("Keys to victory", "info", g ? g.keys : [])}
-    </div>`;
+    <div class="ovbody team">${body || `<div class="pending" style="padding:16px 0">Nothing loaded for this team yet.</div>`}</div>`;
   document.getElementById("ov").classList.add("on");
   document.body.style.overflow = "hidden";
   document.getElementById("ovx").addEventListener("click", closeStats);
