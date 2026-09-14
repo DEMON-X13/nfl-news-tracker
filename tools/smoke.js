@@ -54,7 +54,9 @@ dom.window.addEventListener('load', () => {
   check('headlines carry a title for the one-line clamp', n('.tbhd .sub[title]') === 2);
   check('no setup section', ![...d.querySelectorAll('.ovbody .ovsec')].some(e => e.textContent.includes('How the game sets up')));
   check('record chips show the 2026 record', [...d.querySelectorAll('.tbhd .chips .pill:not(.big) b')].map(b => b.textContent).join(' ') === '0-1 1-0' && d.querySelector('.tbhd .chips .pill:not(.big)').textContent.includes('2026'), [...d.querySelectorAll('.tbhd .chips .pill:not(.big)')].map(p => p.textContent).join(' | '));
-  check('stat breakdown at the bottom', n('.ovbody .sbar') >= 12, n('.ovbody .sbar') + ' bars');
+  check('eleven stat rows with divided bars', n('.ovbody .sbar') === 11 && n('.ovbody .sbar .half') === 22, n('.ovbody .sbar') + ' rows');
+  check('stat labels in order', [...d.querySelectorAll('.ovbody .sbar .lb')].map(e => e.firstChild.textContent).join('|') === 'Point differential|Points per game|Points allowed|Yards per play|Yards per play allowed|Turnover margin|Sacks|Sacks allowed|Third down rate|Red zone TD rate|Explosive plays');
+  check('baseline numbers filled for both teams', ![...d.querySelectorAll('.ovbody .sv')].some(e => e.textContent.includes('\u2013')) && d.querySelector('.ovbody .ovsub').textContent.includes('2025'));
   d.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   check('Escape closes overlay', !ov.classList.contains('on'));
 
@@ -68,7 +70,7 @@ dom.window.addEventListener('load', () => {
   w.eval('WEEKS.push({id:"wk99", label:"Week 99", type:"recap", status:"live", dates:"", headline:"Synthetic", intro:"", games:[{away:"DET",home:"BUF",day:"Thu",time:"8:15 PM ET",kick:"2026-09-18T00:15:00Z",tv:"Prime Video",venue:"Highmark Stadium",awayScore:20,homeScore:24}], teams:{}}); show("wk99");');
   check('a later week takes over the page', n('.slot') === 1 && d.getElementById('barweek').textContent.includes('Week 99'));
   click('.slot');
-  check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 6 && n('.ovbody .sbar') >= 12, n('.duo2 .tbsec.empty') + ' empty rows');
+  check('overlay works with no writeups', ov.classList.contains('on') && n('.duo2 .tbsec.empty') === 6 && n('.ovbody .sbar') === 11, n('.duo2 .tbsec.empty') + ' empty rows');
   check('no errors after interactions', errs.length === 0, errs.join(' | ') || 'none');
 
   console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');

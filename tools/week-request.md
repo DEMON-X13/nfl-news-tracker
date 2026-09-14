@@ -41,6 +41,13 @@ For every one of the 32 TEAMS:
                 instruction: protect X against Y, get Z the ball, survive without W. Name the players on both
                 sides and carry the numbers. If the game has been played, write them as what decided it.
                 Start every strengths, weaknesses, and keys bullet with one short bold sentence.
+  stats       - season to date, per game unless noted, used for the Full stat breakdown bars:
+                { "ppg": 27.5, "pa": 19.1, "ypp": 5.9, "yppa": 5.0, "to": 0.4, "sk": 2.9, "ska": 1.8,
+                  "third": 42.1, "rz": 61.5, "expl": 4.4 }
+                ppg points per game, pa points allowed, ypp yards per play, yppa yards per play allowed,
+                to turnover margin per game (signed), sk sacks per game, ska sacks allowed per game,
+                third third down conversion %, rz red zone TD %, expl plays of 20+ yards per game.
+                Sources: TeamRankings season tables, ESPN team stats for 20+ yard plays.
   ranks       - five ranks, each {rank, prev}, out of 32 with no ties. 1 is always best.
                   overall  - your read of the team right now, blending record, point differential, and how
                              they have actually played.
@@ -86,6 +93,7 @@ Schema:
       "strengths": ["what they do well and who steps up"],
       "weaknesses": ["where it breaks down, injuries included"],
       "keys": ["what this team has to do to win this game"],
+      "stats": { "ppg": 27.5, "pa": 19.1, "ypp": 5.9, "yppa": 5.0, "to": 0.4, "sk": 2.9, "ska": 1.8, "third": 42.1, "rz": 61.5, "expl": 4.4 },
       "ranks": {
         "overall": { "rank": 3, "prev": 3 },
         "offense": { "rank": 6, "prev": 2 },

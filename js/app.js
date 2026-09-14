@@ -134,24 +134,24 @@ function openGame(key){
     </div>`;
   };
 
-  /* stat breakdown: current rankings, then team numbers, as paired bars */
-  const num = v => Math.round(v*10)/10;
-  const ra = rk(g.away, w), rh = rk(g.home, w);
-  const rankRows = [
-    {label:"Overall rank", a:ra.overall.rank, h:rh.overall.rank, hi:"lo", note:"of 32"},
-    {label:"Offense rank", a:ra.offense.rank, h:rh.offense.rank, hi:"lo", note:"of 32"},
-    {label:"Defense rank", a:ra.defense.rank, h:rh.defense.rank, hi:"lo", note:"of 32"},
-    {label:"Points per game rank", a:ra.ppg.rank, h:rh.ppg.rank, hi:"lo", note:"of 32"},
-    {label:"Turnover margin rank", a:ra.turnover.rank, h:rh.turnover.rank, hi:"lo", note:"of 32"}
-  ];
+  /* stat breakdown. A week's own per-team "stats" (2026 season to date) wins; otherwise the 2025 baseline. */
+  const statsOf = ab => ((w.teams||{})[ab]||{}).stats || STATS25[ab] || {};
+  const sa = statsOf(g.away), sh = statsOf(g.home);
+  const live = !!(((w.teams||{})[g.away]||{}).stats && ((w.teams||{})[g.home]||{}).stats);
+  const basis = live ? "2026 season to date" : "2025 season, per game";
+  const r1 = v => (v == null || isNaN(v)) ? null : Math.round(v*10)/10;
   const rows = [
-    {label:"Points per game", a:num(a.pf/17), h:num(hm.pf/17), hi:"a", note:"2025"},
-    {label:"Points allowed", a:num(a.pa/17), h:num(hm.pa/17), hi:"lo", note:"2025"},
-    {label:"Point differential", a:a.pd, h:hm.pd, hi:"sign", note:"2025"},
-    {label:"SRS", a:num(a.srs), h:num(hm.srs), hi:"sign", note:"2025"},
-    {label:"Turnover margin", a:a.to, h:hm.to, hi:"sign", note:"2025"},
-    {label:"Posted win total", a:a.wt, h:hm.wt, hi:"a", note:"2026"},
-    {label:"Analyst rank", a:a.rank, h:hm.rank, hi:"lo", note:"of 32"}
+    {label:"Point differential", a:r1(sa.ppg - sa.pa), h:r1(sh.ppg - sh.pa), hi:"a", sign:true, note:"per game"},
+    {label:"Points per game", a:sa.ppg, h:sh.ppg, hi:"a"},
+    {label:"Points allowed", a:sa.pa, h:sh.pa, hi:"lo"},
+    {label:"Yards per play", a:sa.ypp, h:sh.ypp, hi:"a"},
+    {label:"Yards per play allowed", a:sa.yppa, h:sh.yppa, hi:"lo"},
+    {label:"Turnover margin", a:sa.to, h:sh.to, hi:"a", sign:true, note:"per game"},
+    {label:"Sacks", a:sa.sk, h:sh.sk, hi:"a"},
+    {label:"Sacks allowed", a:sa.ska, h:sh.ska, hi:"lo"},
+    {label:"Third down rate", a:sa.third, h:sh.third, hi:"a", pct:true},
+    {label:"Red zone TD rate", a:sa.rz, h:sh.rz, hi:"a", pct:true},
+    {label:"Explosive plays", a:sa.expl, h:sh.expl, hi:"a", note:"20+ yards"}
   ].concat(g.rows||[]);
   const bar = r => {
     const x = parseFloat(r.a), y = parseFloat(r.h);
@@ -163,12 +163,12 @@ function openGame(key){
     }
     const aw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? x<y : x>y) : false;
     const hw = !isNaN(x)&&!isNaN(y)&&x!==y ? (r.hi==="lo" ? y<x : y>x) : false;
-    const fmt = v => (r.hi==="sign" && typeof v==="number" && v>0) ? "+"+v : v;
+    const fmt = v => (v == null || (typeof v === "number" && isNaN(v))) ? "&ndash;"
+      : (r.pct ? v + "%" : (r.sign && typeof v === "number" && v > 0) ? "+" + v : v);
     return `<div class="sbar">
       <div class="sv ${aw?"win":""}">${fmt(r.a)}</div>
-      <div class="mid"><span class="lb">${r.label}</span>
-        <span class="track"><i style="width:${pa}%;background:${a.color}"></i><i style="width:${ph}%;background:${hm.color}"></i></span>
-        ${r.note?`<span class="nt">${r.note}</span>`:""}</div>
+      <div class="mid"><span class="lb">${r.label}${r.note?`<small>${r.note}</small>`:""}</span>
+        <span class="track"><span class="half l"><i style="width:${pa}%;background:${a.color}"></i></span><span class="half r"><i style="width:${ph}%;background:${hm.color}"></i></span></span></div>
       <div class="sv ${hw?"win":""}">${fmt(r.h)}</div>
     </div>`;
   };
@@ -184,14 +184,12 @@ function openGame(key){
     <div class="ovbody game">
       ${g.note ? `<p class="ovnote">${g.note}</p>` : ""}
       <div class="duo2">${teamBlock(g.away, "c1")}${teamBlock(g.home, "c2")}</div>
-      <div class="ovsec n">Full stat breakdown<span class="ovsub">green marks the better number</span></div>
+      <div class="ovsec n">Full stat breakdown<span class="ovsub">${basis}</span></div>
       <div class="ovlegend">
         <span><i style="background:${a.color}"></i>${a.name}</span>
         <span><i style="background:${hm.color}"></i>${hm.name}</span>
+        <span>Green marks the better number</span>
       </div>
-      <div class="ovsub2">Current rankings</div>
-      ${rankRows.map(bar).join("")}
-      <div class="ovsub2">Team numbers</div>
       ${rows.map(bar).join("")}
     </div>`;
   const ov = document.getElementById("ov");
